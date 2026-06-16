@@ -143,7 +143,7 @@ svg.schema-svg{display:block;margin:0 auto}
       <h3>Gross Development Value (GDV)</h3>
     </div>
     <table>
-      <thead><tr><th>Component</th><th class="right">Budget (RM)</th></tr></thead>
+      <thead><tr><th>Component</th><th class="right">Budget (RM)</th><th class="right">PSF (RM)</th></tr></thead>
       <tbody id="gdv-tbody"></tbody>
     </table>
   </div>
@@ -338,6 +338,7 @@ const phases = {
   P1:{
     name:'P1 — Residensi Aman',
     kpi:{gdv:277571213,gdc:79253429,pbt:198317784,margin:.714},
+    nfa:950000,
     gdv:[
       {label:'Residential (800 units × RM 350k avg)',amt:280000000},
       {label:'Commercial Lots (20 units × RM 600k)',amt:12000000},
@@ -402,6 +403,7 @@ const phases = {
   P2:{
     name:'P2 — Komersial Hub',
     kpi:{gdv:185000000,gdc:62000000,pbt:123000000,margin:.665},
+    nfa:540000,
     gdv:[
       {label:'Shop Offices (3-sty, 60 units × RM 2.2M)',amt:132000000},
       {label:'SOHO Units (120 units × RM 420k)',amt:50400000},
@@ -447,6 +449,7 @@ const phases = {
   P3:{
     name:'P3 — Villapark',
     kpi:{gdv:142000000,gdc:45800000,pbt:96200000,margin:.677},
+    nfa:410000,
     gdv:[
       {label:'Semi-D (48 units × RM 1.8M)',amt:86400000},
       {label:'Bungalow (16 units × RM 2.8M)',amt:44800000},
@@ -493,6 +496,7 @@ const phases = {
   Total:{
     name:'Total Project',
     kpi:{gdv:605000000,gdc:187053429,pbt:417946571,margin:.691},
+    nfa:1900000,
     gdv:[
       {label:'P1 — Residensi Aman',amt:277571213},
       {label:'P2 — Komersial Hub',amt:185000000},
@@ -536,9 +540,10 @@ function renderPhase(p){
   let gdvRows = '';
   d.gdv.forEach(r=>{
     const cls = r.amt < 0 ? ' class="gdv-deduct"' : '';
-    gdvRows += `<tr${cls}><td>${r.label}</td><td class="right num">${r.amt<0?'('+fmt(Math.abs(r.amt))+')':fmt(r.amt)}</td></tr>`;
+    const psf = r.amt/d.nfa;
+    gdvRows += `<tr${cls}><td>${r.label}</td><td class="right num">${r.amt<0?'('+fmt(Math.abs(r.amt))+')':fmt(r.amt)}</td><td class="right num">${r.amt<0?'('+Math.abs(psf).toFixed(1)+')':psf.toFixed(1)}</td></tr>`;
   });
-  gdvRows += `<tr class="total-row"><td>Net GDV</td><td class="right num">${fmt(k.gdv)}</td></tr>`;
+  gdvRows += `<tr class="total-row"><td>Net GDV</td><td class="right num">${fmt(k.gdv)}</td><td class="right num">${(k.gdv/d.nfa).toFixed(1)}</td></tr>`;
   document.getElementById('gdv-tbody').innerHTML = gdvRows;
 
   // Pillars
@@ -557,12 +562,12 @@ function renderPhase(p){
       </div>
       <div id="pillar-${pid}" style="${isOpen?'':'display:none'}">
         <table>
-          <thead><tr><th>Code</th><th>No.</th><th>Description</th><th class="right">Budget (RM)</th></tr></thead>
+          <thead><tr><th>Code</th><th>No.</th><th>Description</th><th class="right">Budget (RM)</th><th class="right">PSF (RM)</th></tr></thead>
           <tbody>`;
     pillar.items.forEach(item=>{
-      html += `<tr><td class="code-cell">${item.code}</td><td class="code-cell">${item.no}</td><td>${item.desc}</td><td class="right num">${fmt(item.budget)}</td></tr>`;
+      html += `<tr><td class="code-cell">${item.code}</td><td class="code-cell">${item.no}</td><td>${item.desc}</td><td class="right num">${fmt(item.budget)}</td><td class="right num">${(item.budget/d.nfa).toFixed(1)}</td></tr>`;
     });
-    html += `<tr class="total-row"><td colspan="3">Subtotal — ${pillar.name}</td><td class="right num">${fmt(total)}</td></tr>
+    html += `<tr class="total-row"><td colspan="3">Subtotal — ${pillar.name}</td><td class="right num">${fmt(total)}</td><td class="right num">${(total/d.nfa).toFixed(1)}</td></tr>
           </tbody></table></div></div>`;
   });
   document.getElementById('pillars-container').innerHTML = html;
