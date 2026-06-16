@@ -562,14 +562,27 @@ function renderPhase(p){
       </div>
       <div id="pillar-${pid}" style="${isOpen?'':'display:none'}">
         <table>
-          <thead><tr><th>Code</th><th>No.</th><th>Description</th><th class="right">Budget (RM)</th><th class="right">PSF (RM)</th></tr></thead>
+          <thead><tr><th>Code</th><th>No.</th><th>Description</th><th class="right">Budget (RM)</th><th class="right">PSF (RM)</th><th class="right">% of GDV</th></tr></thead>
           <tbody>`;
     pillar.items.forEach(item=>{
-      html += `<tr><td class="code-cell">${item.code}</td><td class="code-cell">${item.no}</td><td>${item.desc}</td><td class="right num">${fmt(item.budget)}</td><td class="right num">${(item.budget/d.nfa).toFixed(1)}</td></tr>`;
+      html += `<tr><td class="code-cell">${item.code}</td><td class="code-cell">${item.no}</td><td>${item.desc}</td><td class="right num">${fmt(item.budget)}</td><td class="right num">${(item.budget/d.nfa).toFixed(1)}</td><td class="right num">${(item.budget/k.gdv*100).toFixed(2)}%</td></tr>`;
     });
-    html += `<tr class="total-row"><td colspan="3">Subtotal — ${pillar.name}</td><td class="right num">${fmt(total)}</td><td class="right num">${(total/d.nfa).toFixed(1)}</td></tr>
+    html += `<tr class="total-row"><td colspan="3">Subtotal — ${pillar.name}</td><td class="right num">${fmt(total)}</td><td class="right num">${(total/d.nfa).toFixed(1)}</td><td class="right num">${(total/k.gdv*100).toFixed(2)}%</td></tr>
           </tbody></table></div></div>`;
   });
+
+  // Profit summary (bottom of GDC section)
+  html += `<div class="section-card">
+      <div class="section-header"><h3>Project Profit Summary</h3></div>
+      <table>
+        <thead><tr><th>Line</th><th class="right">Amount (RM)</th><th class="right">PSF (RM)</th><th class="right">% of GDV</th></tr></thead>
+        <tbody>
+          <tr><td>Net GDV</td><td class="right num">${fmt(k.gdv)}</td><td class="right num">${(k.gdv/d.nfa).toFixed(1)}</td><td class="right num">100.00%</td></tr>
+          <tr class="gdv-deduct"><td>Less: GDC</td><td class="right num">(${fmt(k.gdc)})</td><td class="right num">(${(k.gdc/d.nfa).toFixed(1)})</td><td class="right num">(${(k.gdc/k.gdv*100).toFixed(2)}%)</td></tr>
+          <tr class="total-row"><td>Profit (PBT)</td><td class="right num">${fmt(k.pbt)}</td><td class="right num">${(k.pbt/d.nfa).toFixed(1)}</td><td class="right num">${(k.pbt/k.gdv*100).toFixed(2)}%</td></tr>
+        </tbody>
+      </table>
+    </div>`;
   document.getElementById('pillars-container').innerHTML = html;
 }
 
