@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NCT Feasibility — Input Tool</title>
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#F0F2F5;color:#1a1a2e;font-size:14px}
+header{background:#0F3460;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+header h1{font-size:16px;font-weight:600}
+.hdr-right{display:flex;gap:8px;align-items:center}
+.hdr-link{color:rgba(255,255,255,.55);font-size:12px;text-decoration:none}
+.hdr-link:hover{color:#fff}
+.btn-export{padding:7px 14px;background:#E94560;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap}
+.btn-pipeline{padding:7px 14px;background:#10B981;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap}
+.btn-export:hover{background:#c73450}
+.btn-pipeline:hover{background:#059669}
+/* Meta */
+.meta-wrap{background:#fff;border-bottom:1px solid #e0e0e0}
+.meta-toggle{padding:10px 20px;cursor:pointer;font-size:13px;font-weight:600;color:#0F3460;user-select:none;display:flex;align-items:center;gap:6px}
+.meta-toggle:hover{background:#f5f7ff}
+#meta-arrow{transition:transform .2s;display:inline-block;font-size:10px}
+#meta-arrow.open{transform:rotate(90deg)}
+.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:14px 20px 18px}
+.meta-field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#888;margin-bottom:4px}
+.meta-field input,.meta-field select{width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;color:#1a1a2e;outline:none;transition:border-color .15s;background:#fff}
+.meta-field input:focus,.meta-field select:focus{border-color:#0F3460}
+/* Tabs */
+.phase-tabs{display:flex;border-bottom:2px solid #0F3460;background:#fff;overflow-x:auto}
+.ptab{padding:10px 20px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:500;color:#666;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .18s}
+.ptab.active{color:#0F3460;border-bottom-color:#E94560;font-weight:600}
+.ptab:hover:not(.active){color:#0F3460;background:#f5f7ff}
+.ptab-add{padding:10px 16px;border:none;background:none;cursor:pointer;font-size:20px;color:#0F3460;border-bottom:3px solid transparent;margin-bottom:-2px;line-height:1}
+.ptab-add:hover{color:#E94560}
+.ptab-total{padding:10px 20px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:500;color:#666;border-bottom:3px solid transparent;margin-bottom:-2px;border-left:2px solid #e0e0e0;white-space:nowrap}
+.ptab-total.active{color:#0F3460;border-bottom-color:#E94560;font-weight:600}
+/* Phase content */
+.pc{display:none;padding:20px;max-width:1200px;margin:0 auto}
+.pc.active{display:block}
+/* KPI */
+.kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi-card{background:#fff;border-radius:8px;padding:14px 18px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px}
+.kpi-val{font-size:22px;font-weight:700;color:#0F3460}
+.kpi-val.accent{color:#E94560}
+/* Cards */
+.section-card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px;overflow:hidden}
+.section-header{padding:11px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f0f0}
+.section-header h3{font-size:13px;font-weight:600;color:#0F3460;display:flex;align-items:center;gap:8px}
+.pillar-tag{font-size:11px;background:#E8F0FE;color:#0F3460;padding:2px 8px;border-radius:4px}
+.hdr-right-grp{display:flex;align-items:center;gap:10px}
+.hdr-sub{font-size:13px;font-weight:700;color:#0F3460}
+.toggle-btn{background:#f0f2f5;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:12px;transition:transform .2s;flex-shrink:0}
+.toggle-btn.collapsed{transform:rotate(-90deg)}
+/* Tables */
+.dt{width:100%;border-collapse:collapse}
+.dt th{padding:7px 10px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#888;background:#fafbfc;border-bottom:1px solid #eee;white-space:nowrap}
+.dt th.r,.dt td.r{text-align:right}
+.dt td{padding:6px 10px;border-bottom:1px solid #f0f0f0;font-size:13px}
+.dt tr:last-child td{border-bottom:none}
+.dt tr.tr-total td{font-weight:700;background:#f5f7ff;color:#0F3460}
+.dt tr.tr-ded td{color:#E94560}
+.dt tr.tr-sub td{font-weight:600;background:#fafbfc}
+.num{font-variant-numeric:tabular-nums}
+/* Inputs */
+.inp{padding:5px 8px;border:1.5px solid #ddd;border-radius:5px;font-size:12px;width:100%;outline:none;transition:border-color .15s;color:#1a1a2e;background:#fff}
+.inp:focus{border-color:#0F3460}
+.inp.w80{width:80px}
+.inp.w100{width:100px}
+.inp.w130{width:130px}
+.inp.mono{font-family:monospace;font-size:11px}
+select.inp{padding:4px 6px;cursor:pointer}
+.rm-btn{background:none;border:none;color:#ccc;cursor:pointer;font-size:15px;padding:2px 5px;border-radius:3px;line-height:1}
+.rm-btn:hover{color:#E94560;background:#fee}
+.add-btn{display:inline-flex;align-items:center;gap:4px;margin:8px 12px 10px;padding:5px 14px;background:#f0f2f5;border:1.5px dashed #bbb;border-radius:6px;cursor:pointer;font-size:12px;color:#555;font-weight:500;transition:all .15s}
+.add-btn:hover{background:#E8F0FE;border-color:#0F3460;color:#0F3460}
+/* Deduction block */
+.deduct-block{border-top:2px solid #f0f0f0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NCT Feasibility · Input Tool</h1>
+  <div class="hdr-right">
+    <a href="NCT_Feasi_Demo.html" class="hdr-link">← View Demo</a>
+    <button class="btn-export" onclick="downloadReport()">⬇ Report Excel</button>
+    <button class="btn-pipeline" onclick="downloadPipeline()">⬇ Pipeline Excel</button>
+  </div>
+</header>
+
+<!-- Project metadata -->
+<div class="meta-wrap">
+  <div class="meta-toggle" onclick="toggleMeta()">
+    <span id="meta-arrow">▶</span> Project Details
+  </div>
+  <div id="meta-body" style="display:none">
+    <div class="meta-grid">
+      <div class="meta-field"><label>Project Name</label><input id="m-name" placeholder="e.g. Residensi Aman"></div>
+      <div class="meta-field"><label>Project Code</label><input id="m-code" placeholder="e.g. NCT-P001"></div>
+      <div class="meta-field"><label>Developer</label><input id="m-dev" placeholder="e.g. NCT Group" value="NCT Group"></div>
+      <div class="meta-field"><label>Location</label><input id="m-loc" placeholder="e.g. Shah Alam, Selangor"></div>
+      <div class="meta-field"><label>Version Code</label><input id="m-ver" placeholder="e.g. V01" value="V01"></div>
+      <div class="meta-field"><label>Scenario</label>
+        <select id="m-scenario"><option>Base</option><option>Optimistic</option><option>Stress</option></select>
+      </div>
+      <div class="meta-field"><label>Status</label>
+        <select id="m-status"><option>Draft</option><option>Approved</option><option>Archived</option></select>
+      </div>
+      <div class="meta-field"><label>Version Date</label><input id="m-date" type="date" value="2026-06-21"></div>
+      <div class="meta-field"><label>WACC (%)</label><input id="m-wacc" type="number" placeholder="8.0" value="8.0" step="0.1"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Phase tabs -->
+<div class="phase-tabs" id="phase-tabs"></div>
+
+<!-- Phase contents -->
+<div id="phase-contents"></div>
+
+<script>
+// ---- Helpers ----
+const R = n => (isNaN(n)||!isFinite(n)) ? 0 : n;
+const fmt = n => 'RM ' + R(Math.round(n)).toLocaleString();
+const fmtM = n => 'RM ' + (R(n)/1e6).toFixed(2) + 'M';
+const fmtPsf = (n,nfa) => nfa>0 ? R(n/nfa).toFixed(1) : '—';
+const fmtPct = (n,gdv) => gdv>0 ? (R(n/gdv)*100).toFixed(2)+'%' : '—';
+const fmtAmt = n => n ? fmt(n) : '—';
+
+// ---- State ----
+let phases = [];
+let computed = {}; // pIdx -> {netGDV,totalGDC,pbt,margin,totalNFA}
+let currentTab = 0;
+
+// ---- Default content ----
+const PILLARS = [
+  {code:'P1',name:'Land Cost',prefix:'L',items:[
+    ['L.PURCHASE','1.1','Land Purchase'],['L.STAMP','1.2','Stamp Duty'],
+    ['L.LEGAL','1.3','Legal Fees'],['L.CONV','1.4','Land Conversion Premium'],
+    ['L.HOLD','1.5','Holding Cost'],
+  ]},
+  {code:'P2',name:'Construction Cost',prefix:'C',items:[
+    ['C.PILE','2.1','Piling Works'],['C.SUB','2.2','Substructure'],
+    ['C.SUPER_CS','2.3','Superstructure (C&S)'],['C.ARCH','2.4','Architectural Finishes'],
+    ['C.MEP_MECH','2.5','M&E — Mechanical'],['C.MEP_ELEC','2.6','M&E — Electrical'],
+    ['C.PLUMB','2.7','Plumbing & Sanitary'],['C.CONT','2.8','Contingency'],
+  ]},
+  {code:'P3',name:'Infrastructure',prefix:'I',items:[
+    ['I.ROAD_INT','3.1','Internal Road Works'],['I.DRAIN','3.2','Drainage'],
+    ['I.TNB','3.3','TNB Substation'],['I.WATER','3.4','Water Reticulation'],
+    ['I.SEWER','3.5','Sewerage (IWK)'],['I.DEVCON','3.6','Development Contribution'],
+  ]},
+  {code:'P4',name:'Professional Fees',prefix:'P',items:[
+    ['P.ARCH','4.1','Architect Fee'],['P.STRUCT','4.2','Structural Engineer'],
+    ['P.MEP','4.3','M&E Engineer'],['P.QS','4.4','Quantity Surveyor'],
+    ['P.SURVEY','4.5','Licensed Surveyor'],['P.LEGAL','4.6','Legal (End-Financier)'],
+  ]},
+  {code:'P5',name:'Finance, Sales & Marketing',prefix:'F',items:[
+    ['F.IDC','5.1','Interest During Construction'],['F.LOANFEE','5.2','Loan Arrangement Fee'],
+    ['F.GALLERY','5.3','Sales Gallery Setup'],['F.MKT','5.4','Marketing & Advertising'],
+    ['F.AGENT','5.5','Agent Commission'],['F.PM','5.6','Project Management'],
+  ]},
+];
+
+// ---- HTML builders ----
+function itemRowStr(pIdx, pCode, prefix, code='', no='', desc='') {
+  return `<tr class="i-row">
+    <td><input type="text" class="inp mono w100 i-code" placeholder="${prefix}.XXXXX" value="${code}" oninput="cp(${pIdx})"></td>
+    <td><input type="text" class="inp w80 i-no" placeholder="—" value="${no}" style="width:50px" oninput="cp(${pIdx})"></td>
+    <td><input type="text" class="inp i-desc" placeholder="Description" value="${desc}" oninput="cp(${pIdx})"></td>
+    <td><input type="number" class="inp w100 r i-budget" placeholder="0" min="0" oninput="cp(${pIdx})"></td>
+    <td class="r num computed i-psf">—</td>
+    <td class="r num computed i-pct">—</td>
+    <td><button class="rm-btn" onclick="rmRow(this,${pIdx})">✕</button></td>
+  </tr>`;
+}
+
+function pillarStr(pIdx, p) {
+  let rows = '';
+  p.items.forEach(([code,no,desc]) => { rows += itemRowStr(pIdx, p.code, p.prefix, code, no, desc); });
+  return `
+  <div class="section-card">
+    <div class="section-header" onclick="togglePillar(${pIdx},'${p.code}')">
+      <h3><span class="pillar-tag">${p.code}</span>${p.name}</h3>
+      <div class="hdr-right-grp">
+        <span class="hdr-sub ps-${p.code}">—</span>
+        <button class="toggle-btn" id="tb-${pIdx}-${p.code}">▾</button>
+      </div>
+    </div>
+    <div id="pb-${pIdx}-${p.code}" class="pb-${p.code}">
+      <table class="dt">
+        <thead><tr>
+          <th style="min-width:108px">Code</th><th style="min-width:50px">No.</th>
+          <th>Description</th><th class="r" style="min-width:130px">Budget (RM)</th>
+          <th class="r" style="min-width:90px">PSF (RM)</th>
+          <th class="r" style="min-width:90px">% of GDV</th>
+          <th width="28"></th>
+        </tr></thead>
+        <tbody class="items-tbody">${rows}</tbody>
+      </table>
+      <button class="add-btn" onclick="addItem(${pIdx},'${p.code}','${p.prefix}')">+ Add Item</button>
+    </div>
+  </div>`;
+}
+
+function phaseHTML(pIdx) {
+  let pillarsHTML = PILLARS.map(p => pillarStr(pIdx, p)).join('');
+  return `
+  <div class="kpi-bar">
+    <div class="kpi-card"><div class="kpi-label">Net GDV</div><div class="kpi-val kpi-gdv">—</div></div>
+    <div class="kpi-card"><div class="kpi-label">GDC</div><div class="kpi-val kpi-gdc">—</div></div>
+    <div class="kpi-card"><div class="kpi-label">PBT</div><div class="kpi-val kpi-pbt">—</div></div>
+    <div class="kpi-card"><div class="kpi-label">Margin</div><div class="kpi-val accent kpi-margin">—</div></div>
+  </div>
+  <div class="section-card">
+    <div class="section-header"><h3>Gross Development Value (GDV)</h3></div>
+    <table class="dt">
+      <thead><tr>
+        <th style="min-width:140px">Building / Component</th>
+        <th style="min-width:120px">Type</th>
+        <th class="r" style="min-width:75px">Units</th>
+        <th class="r" style="min-width:110px">NFA/Unit (sqft)</th>
+        <th class="r" style="min-width:110px">ASP (RM psf)</th>
+        <th class="r" style="min-width:140px">Gross GDV (RM)</th>
+        <th width="28"></th>
+      </tr></thead>
+      <tbody class="bldg-tbody"></tbody>
+    </table>
+    <button class="add-btn" onclick="addBuilding(${pIdx})">+ Add Building</button>
+    <div class="deduct-block">
+      <table class="dt">
+        <tbody>
+          <tr class="tr-sub">
+            <td style="min-width:180px"><strong>Gross GDV</strong></td>
+            <td style="min-width:200px"></td>
+            <td class="r num computed ggdv-val" style="min-width:140px">—</td>
+            <td class="r num computed ggdv-psf" style="min-width:90px">—</td>
+            <td width="28"></td>
+          </tr>
+          <tr class="tr-ded">
+            <td>Less: Bumi Discount</td>
+            <td><input type="number" class="inp w80 bumi-pct" placeholder="%" min="0" max="100" step="0.1" oninput="cp(${pIdx})"> %</td>
+            <td class="r num computed bumi-val">—</td>
+            <td class="r num computed bumi-psf">—</td>
+            <td></td>
+          </tr>
+          <tr class="tr-ded">
+            <td>Less: Affordable Cross-Subsidy</td>
+            <td><input type="number" class="inp w130 subsidy-amt" placeholder="RM amount" min="0" oninput="cp(${pIdx})"></td>
+            <td class="r num computed sub-val">—</td>
+            <td class="r num computed sub-psf">—</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>Add: Carpark Revenue</td>
+            <td><input type="number" class="inp w130 cpark-amt" placeholder="RM amount" min="0" oninput="cp(${pIdx})"></td>
+            <td class="r num computed cpark-val">—</td>
+            <td class="r num computed cpark-psf">—</td>
+            <td></td>
+          </tr>
+          <tr class="tr-total">
+            <td colspan="2"><strong>Net GDV</strong></td>
+            <td class="r num computed ngdv-val">—</td>
+            <td class="r num computed ngdv-psf">—</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  ${pillarsHTML}
+  <div class="section-card">
+    <div class="section-header"><h3>Profit Summary</h3></div>
+    <table class="dt">
+      <thead><tr><th>Line</th><th class="r">Amount (RM)</th><th class="r">PSF (RM)</th><th class="r">% of GDV</th></tr></thead>
+      <tbody>
+        <tr><td>Net GDV</td><td class="r num computed psum-gdv">—</td><td class="r num computed psum-gdv-psf">—</td><td class="r">100.00%</td></tr>
+        <tr class="tr-ded"><td>Less: GDC</td><td class="r num computed psum-gdc">—</td><td class="r num computed psum-gdc-psf">—</td><td class="r computed psum-gdc-pct">—</td></tr>
+        <tr class="tr-total"><td>Profit (PBT)</td><td class="r num computed psum-pbt">—</td><td class="r num computed psum-pbt-psf">—</td><td class="r computed psum-pbt-pct">—</td></tr>
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ---- Phase management ----
+function addPhase(name) {
+  const pIdx = phases.length;
+  phases.push({name: name || 'Phase '+(pIdx+1)});
+  const div = document.createElement('div');
+  div.id = 'pc-'+pIdx; div.className = 'pc';
+  div.innerHTML = phaseHTML(pIdx);
+  document.getElementById('phase-contents').appendChild(div);
+  renderTabs();
+  addBuilding(pIdx);
+  switchTab(pIdx);
+}
+
+function switchTab(idx) {
+  document.querySelectorAll('.pc').forEach(el=>el.classList.remove('active'));
+  currentTab = idx;
+  if (idx==='total') {
+    document.getElementById('pc-total').classList.add('active');
+    renderTotal();
+  } else {
+    const el = document.getElementById('pc-'+idx);
+    if (el) el.classList.add('active');
+  }
+  renderTabs();
+}
+
+function renderTabs() {
+  let h = '';
+  phases.forEach((p,i) => {
+    h += `<button class="ptab${currentTab===i?' active':''}" onclick="switchTab(${i})">${p.name}</button>`;
+  });
+  h += `<button class="ptab-add" title="Add Phase" onclick="promptPhase()">+</button>`;
+  h += `<button class="ptab-total${currentTab==='total'?' active':''}" onclick="switchTab('total')">∑ Total</button>`;
+  document.getElementById('phase-tabs').innerHTML = h;
+}
+
+function promptPhase() {
+  const n = prompt('Phase name:', 'Phase '+(phases.length+1));
+  if (n !== null) addPhase(n.trim()||'Phase '+(phases.length+1));
+}
+
+// ---- Building rows ----
+function addBuilding(pIdx) {
+  const tbody = document.querySelector('#pc-'+pIdx+' .bldg-tbody');
+  tbody.insertAdjacentHTML('beforeend', `<tr class="b-row">
+    <td><input type="text" class="inp b-name" placeholder="e.g. Tower A" oninput="cp(${pIdx})"></td>
+    <td><select class="inp b-type" onchange="cp(${pIdx})">
+      <option>Residential</option><option>Commercial</option><option>Carpark</option><option>Hotel</option><option>Industrial</option>
+    </select></td>
+    <td><input type="number" class="inp r b-units" placeholder="0" min="0" oninput="cp(${pIdx})"></td>
+    <td><input type="number" class="inp r b-nfa" placeholder="sqft" min="0" oninput="cp(${pIdx})"></td>
+    <td><input type="number" class="inp r b-asp" placeholder="RM psf" min="0" oninput="cp(${pIdx})"></td>
+    <td class="r num computed b-gdv">—</td>
+    <td><button class="rm-btn" onclick="rmRow(this,${pIdx})">✕</button></td>
+  </tr>`);
+}
+
+function addItem(pIdx, pCode, prefix) {
+  const el = document.querySelector('#pc-'+pIdx+' .pb-'+pCode+' .items-tbody');
+  el.insertAdjacentHTML('beforeend', itemRowStr(pIdx, pCode, prefix));
+  cp(pIdx);
+}
+
+function rmRow(btn, pIdx) {
+  btn.closest('tr').remove();
+  cp(pIdx);
+}
+
+// ---- Core compute ----
+function cp(pIdx) {
+  const pc = document.getElementById('pc-'+pIdx);
+  if (!pc) return;
+
+  // Buildings → gross GDV, NFA
+  let grossGDV=0, totalNFA=0;
+  pc.querySelectorAll('.b-row').forEach(row=>{
+    const u=+row.querySelector('.b-units').value||0;
+    const n=+row.querySelector('.b-nfa').value||0;
+    const a=+row.querySelector('.b-asp').value||0;
+    const gdv=u*n*a;
+    grossGDV+=gdv; totalNFA+=u*n;
+    row.querySelector('.b-gdv').textContent = gdv>0?fmt(gdv):'—';
+  });
+
+  // Deductions
+  const bumiPct=(+pc.querySelector('.bumi-pct').value||0)/100;
+  const bumiAmt=grossGDV*bumiPct;
+  const subsidy=+pc.querySelector('.subsidy-amt').value||0;
+  const carpark=+pc.querySelector('.cpark-amt').value||0;
+  const netGDV=grossGDV-bumiAmt-subsidy+carpark;
+
+  const q = (cls,v) => { const el=pc.querySelector('.'+cls); if(el) el.textContent=v; };
+  q('ggdv-val', fmtAmt(grossGDV));
+  q('ggdv-psf', fmtPsf(grossGDV,totalNFA));
+  q('bumi-val', bumiAmt>0?'('+fmt(bumiAmt)+')':'—');
+  q('bumi-psf', bumiAmt>0?fmtPsf(bumiAmt,totalNFA):'—');
+  q('sub-val', subsidy>0?'('+fmt(subsidy)+')':'—');
+  q('sub-psf', subsidy>0?fmtPsf(subsidy,totalNFA):'—');
+  q('cpark-val', carpark>0?fmt(carpark):'—');
+  q('cpark-psf', carpark>0?fmtPsf(carpark,totalNFA):'—');
+  q('ngdv-val', fmtAmt(netGDV));
+  q('ngdv-psf', fmtPsf(netGDV,totalNFA));
+
+  // Pillars
+  let totalGDC=0;
+  PILLARS.forEach(p=>{
+    const pbEl=pc.querySelector('.pb-'+p.code);
+    if(!pbEl) return;
+    let sub=0;
+    pbEl.querySelectorAll('.i-row').forEach(row=>{
+      const b=+row.querySelector('.i-budget').value||0;
+      sub+=b;
+      row.querySelector('.i-psf').textContent=fmtPsf(b,totalNFA);
+      row.querySelector('.i-pct').textContent=fmtPct(b,netGDV);
+    });
+    totalGDC+=sub;
+    const el=pc.querySelector('.ps-'+p.code);
+    if(el) el.textContent=sub>0?fmt(sub):'—';
+  });
+
+  const pbt=netGDV-totalGDC;
+  const margin=netGDV>0?pbt/netGDV:0;
+
+  // KPI
+  pc.querySelector('.kpi-gdv').textContent=fmtM(netGDV);
+  pc.querySelector('.kpi-gdc').textContent=fmtM(totalGDC);
+  pc.querySelector('.kpi-pbt').textContent=fmtM(pbt);
+  pc.querySelector('.kpi-margin').textContent=netGDV>0?(margin*100).toFixed(1)+'%':'—';
+
+  // Profit summary
+  q('psum-gdv',fmtAmt(netGDV)); q('psum-gdv-psf',fmtPsf(netGDV,totalNFA));
+  q('psum-gdc',fmtAmt(totalGDC)); q('psum-gdc-psf',fmtPsf(totalGDC,totalNFA));
+  q('psum-gdc-pct',fmtPct(totalGDC,netGDV));
+  q('psum-pbt',fmtAmt(pbt)); q('psum-pbt-psf',fmtPsf(pbt,totalNFA));
+  q('psum-pbt-pct',netGDV>0?(margin*100).toFixed(2)+'%':'—');
+
+  computed[pIdx]={netGDV,totalGDC,pbt,margin,totalNFA};
+  if(currentTab==='total') renderTotal();
+}
+
+// ---- Total tab ----
+function renderTotal() {
+  const el=document.getElementById('pc-total');
+  let tGDV=0,tGDC=0,tNFA=0,rows='';
+  phases.forEach((p,i)=>{
+    const d=computed[i]||{};
+    const gdv=d.netGDV||0,gdc=d.totalGDC||0,pbt=d.pbt||0,nfa=d.totalNFA||0;
+    tGDV+=gdv; tGDC+=gdc; tNFA+=nfa;
+    rows+=`<tr>
+      <td style="font-weight:600;color:#0F3460">${p.name}</td>
+      <td class="r num">${gdv>0?fmt(gdv):'—'}</td>
+      <td class="r num">${gdc>0?fmt(gdc):'—'}</td>
+      <td class="r num">${pbt!==0?fmt(pbt):'—'}</td>
+      <td class="r">${gdv>0?(d.margin*100).toFixed(1)+'%':'—'}</td>
+      <td class="r num">${fmtPsf(gdv,nfa)}</td>
+    </tr>`;
+  });
+  const tPBT=tGDV-tGDC, tM=tGDV>0?tPBT/tGDV:0;
+  el.innerHTML=`
+    <div class="kpi-bar">
+      <div class="kpi-card"><div class="kpi-label">Total Net GDV</div><div class="kpi-val">${fmtM(tGDV)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Total GDC</div><div class="kpi-val">${fmtM(tGDC)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Total PBT</div><div class="kpi-val">${fmtM(tPBT)}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Overall Margin</div><div class="kpi-val accent">${tGDV>0?(tM*100).toFixed(1)+'%':'—'}</div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-header"><h3>Phase Breakdown</h3></div>
+      <table class="dt">
+        <thead><tr style="background:#0F3460">
+          <th style="color:#fff">Phase</th><th class="r" style="color:#fff">Net GDV (RM)</th>
+          <th class="r" style="color:#fff">GDC (RM)</th><th class="r" style="color:#fff">PBT (RM)</th>
+          <th class="r" style="color:#fff">Margin</th><th class="r" style="color:#fff">GDV PSF</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr class="tr-total">
+          <td>Total</td><td class="r num">${fmt(tGDV)}</td><td class="r num">${fmt(tGDC)}</td>
+          <td class="r num">${fmt(tPBT)}</td>
+          <td class="r">${tGDV>0?(tM*100).toFixed(1)+'%':'—'}</td>
+          <td class="r num">${fmtPsf(tGDV,tNFA)}</td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div class="section-card" style="margin-top:16px">
+      <div class="section-header"><h3>Profit Summary</h3></div>
+      <table class="dt">
+        <thead><tr><th>Line</th><th class="r">Amount (RM)</th><th class="r">PSF (RM)</th><th class="r">% of GDV</th></tr></thead>
+        <tbody>
+          <tr><td>Net GDV</td><td class="r num">${fmt(tGDV)}</td><td class="r num">${fmtPsf(tGDV,tNFA)}</td><td class="r">100.00%</td></tr>
+          <tr class="tr-ded"><td>Less: GDC</td><td class="r num">${fmt(tGDC)}</td><td class="r num">${fmtPsf(tGDC,tNFA)}</td><td class="r">${fmtPct(tGDC,tGDV)}</td></tr>
+          <tr class="tr-total"><td>Profit (PBT)</td><td class="r num">${fmt(tPBT)}</td><td class="r num">${fmtPsf(tPBT,tNFA)}</td><td class="r">${tGDV>0?(tM*100).toFixed(2)+'%':'—'}</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ---- Toggle pillar ----
+function togglePillar(pIdx, pCode) {
+  const el=document.getElementById('pb-'+pIdx+'-'+pCode);
+  const btn=document.getElementById('tb-'+pIdx+'-'+pCode);
+  const vis=el.style.display!=='none';
+  el.style.display=vis?'none':'';
+  btn.classList.toggle('collapsed',vis);
+}
+
+// ---- Meta toggle ----
+function toggleMeta() {
+  const body=document.getElementById('meta-body');
+  const arr=document.getElementById('meta-arrow');
+  const vis=body.style.display!=='none';
+  body.style.display=vis?'none':'';
+  arr.classList.toggle('open',!vis);
+  arr.textContent=vis?'▶':'▼';
+}
+
+// ---- Read phase data for export ----
+function readMeta(){
+  return {
+    name:document.getElementById('m-name').value||'Untitled Project',
+    code:document.getElementById('m-code').value||'NCT-001',
+    developer:document.getElementById('m-dev').value,
+    location:document.getElementById('m-loc').value,
+    version:document.getElementById('m-ver').value||'V01',
+    scenario:document.getElementById('m-scenario').value,
+    status:document.getElementById('m-status').value,
+    date:document.getElementById('m-date').value,
+    wacc:document.getElementById('m-wacc').value,
+  };
+}
+
+function readPhaseData(pIdx) {
+  const pc=document.getElementById('pc-'+pIdx);
+  const buildings=[];
+  pc.querySelectorAll('.b-row').forEach(row=>{
+    buildings.push({
+      name:row.querySelector('.b-name').value,
+      type:row.querySelector('.b-type').value,
+      units:+row.querySelector('.b-units').value||0,
+      nfa:+row.querySelector('.b-nfa').value||0,
+      asp:+row.querySelector('.b-asp').value||0,
+    });
+  });
+  const items={};
+  PILLARS.forEach(p=>{
+    items[p.code]=[];
+    const pbEl=pc.querySelector('.pb-'+p.code);
+    if(pbEl) pbEl.querySelectorAll('.i-row').forEach(row=>{
+      items[p.code].push({
+        code:row.querySelector('.i-code').value,
+        no:row.querySelector('.i-no').value,
+        desc:row.querySelector('.i-desc').value,
+        budget:+row.querySelector('.i-budget').value||0,
+      });
+    });
+  });
+  return {
+    buildings,items,
+    bumiPct:+pc.querySelector('.bumi-pct').value||0,
+    subsidy:+pc.querySelector('.subsidy-amt').value||0,
+    carpark:+pc.querySelector('.cpark-amt').value||0,
+    ...(computed[pIdx]||{}),
+  };
+}
+
+// ---- Download Report Excel ----
+function downloadReport() {
+  if(!window.XLSX){alert('SheetJS not loaded — internet connection required for export.');return;}
+  const meta=readMeta();
+  const wb=XLSX.utils.book_new();
+  const pNames={P1:'Land Cost',P2:'Construction Cost',P3:'Infrastructure',P4:'Professional Fees',P5:'Finance, Sales & Marketing'};
+
+  phases.forEach((ph,pIdx)=>{
+    const pd=readPhaseData(pIdx);
+    const cd=computed[pIdx]||{};
+    const nfa=cd.totalNFA||0, netGDV=cd.netGDV||0;
+    const R=[];
+    R.push([meta.name||'NCT Project']);
+    R.push([ph.name+' — Feasibility Report']);
+    R.push(['Version: '+meta.version+'   Scenario: '+meta.scenario+'   Status: '+meta.status+'   Date: '+meta.date]);
+    R.push([]);
+    R.push(['GROSS DEVELOPMENT VALUE']);
+    R.push(['Building','Type','Units','NFA/Unit (sqft)','ASP (RM psf)','Gross GDV (RM)']);
+    let grossGDV=0;
+    pd.buildings.forEach(b=>{
+      const g=b.units*b.nfa*b.asp;
+      grossGDV+=g;
+      R.push([b.name,b.type,b.units,b.nfa,b.asp,g]);
+    });
+    R.push(['Gross GDV','','','','',grossGDV]);
+    R.push(['Less: Bumi Discount ('+pd.bumiPct+'%)','','','','',-grossGDV*pd.bumiPct/100]);
+    if(pd.subsidy) R.push(['Less: Affordable Cross-Subsidy','','','','',-pd.subsidy]);
+    if(pd.carpark) R.push(['Add: Carpark Revenue','','','','',pd.carpark]);
+    R.push(['Net GDV','','','','',netGDV]);
+    R.push([]);
+    R.push(['GROSS DEVELOPMENT COST']);
+    R.push(['Code','No.','Description','Budget (RM)','PSF (RM)','% of GDV']);
+    let totalGDC=0;
+    PILLARS.forEach(p=>{
+      const items=pd.items[p.code]||[];
+      if(!items.length) return;
+      R.push([p.code+' — '+pNames[p.code]]);
+      let sub=0;
+      items.forEach(item=>{
+        sub+=item.budget;
+        R.push([item.code,item.no,item.desc,item.budget,
+          nfa>0?+((item.budget/nfa).toFixed(1)):'',
+          netGDV>0?+((item.budget/netGDV*100).toFixed(2)):'']);
+      });
+      totalGDC+=sub;
+      R.push(['Subtotal — '+pNames[p.code],'','',sub,
+        nfa>0?+(sub/nfa).toFixed(1):'',netGDV>0?+(sub/netGDV*100).toFixed(2):'']);
+      R.push([]);
+    });
+    const pbt=netGDV-totalGDC, m=netGDV>0?pbt/netGDV:0;
+    R.push(['PROFIT SUMMARY']);
+    R.push(['Line','Amount (RM)','PSF (RM)','% of GDV']);
+    R.push(['Net GDV',netGDV,nfa>0?+(netGDV/nfa).toFixed(1):'',"100.00%"]);
+    R.push(['Less: GDC',totalGDC,nfa>0?+(totalGDC/nfa).toFixed(1):'',netGDV>0?+(totalGDC/netGDV*100).toFixed(2)+'%':'']);
+    R.push(['Profit (PBT)',pbt,nfa>0?+(pbt/nfa).toFixed(1):'',netGDV>0?+(m*100).toFixed(2)+'%':'']);
+    const ws=XLSX.utils.aoa_to_sheet(R);
+    ws['!cols']=[{wch:28},{wch:14},{wch:32},{wch:16},{wch:12},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws,ph.name.substring(0,31));
+  });
+
+  // Summary sheet
+  const SR=[['PROJECT SUMMARY — '+meta.name],
+    ['Version: '+meta.version+'   Scenario: '+meta.scenario],[]];
+  SR.push(['Phase','Net GDV (RM)','GDC (RM)','PBT (RM)','Margin (%)','GDV PSF']);
+  let tG=0,tC=0,tN=0;
+  phases.forEach((p,i)=>{
+    const d=computed[i]||{};
+    tG+=d.netGDV||0; tC+=d.totalGDC||0; tN+=d.totalNFA||0;
+    SR.push([p.name,d.netGDV||0,d.totalGDC||0,d.pbt||0,
+      d.netGDV>0?+(d.margin*100).toFixed(1):'',
+      d.totalNFA>0?+((d.netGDV||0)/d.totalNFA).toFixed(1):'']);
+  });
+  SR.push(['Total',tG,tC,tG-tC,tG>0?+((tG-tC)/tG*100).toFixed(1):'',tN>0?+(tG/tN).toFixed(1):'']);
+  const sw=XLSX.utils.aoa_to_sheet(SR);
+  sw['!cols']=[{wch:22},{wch:16},{wch:16},{wch:16},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,sw,'Summary');
+  XLSX.writeFile(wb,(meta.code||'NCT')+'_'+meta.version+'_Report.xlsx');
+}
+
+// ---- Download Pipeline Excel ----
+function downloadPipeline() {
+  if(!window.XLSX){alert('SheetJS not loaded — internet connection required for export.');return;}
+  const meta=readMeta();
+  const wb=XLSX.utils.book_new();
+  const pLabelMap={P1:'LAND',P2:'CONSTRUCTION',P3:'INFRASTRUCTURE',P4:'PROFESSIONAL',P5:'FINANCE_MKT'};
+
+  // tbl_META
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
+    ['project_code','project_name','developer','location','version_code','scenario_code','status','version_date','wacc','currency'],
+    [meta.code,meta.name,meta.developer,meta.location,meta.version,meta.scenario,meta.status,meta.date,meta.wacc,'MYR'],
+  ]),'tbl_META');
+
+  // tbl_PHASE
+  const phaseRows=[['phase_code','phase_name','project_code','version_code','scenario_code']];
+  phases.forEach((p,i)=>phaseRows.push(['P'+(i+1),p.name,meta.code,meta.version,meta.scenario]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(phaseRows),'tbl_PHASE');
+
+  // tbl_SALES
+  const salesRows=[['phase_code','building_name','component_type','units','nfa_per_unit_sqft','asp_psf','gross_gdv','bumi_pct','subsidy_amt','carpark_amt','version_code']];
+  phases.forEach((p,i)=>{
+    const pd=readPhaseData(i), pc='P'+(i+1);
+    pd.buildings.forEach(b=>{
+      salesRows.push([pc,b.name,b.type,b.units,b.nfa,b.asp,b.units*b.nfa*b.asp,pd.bumiPct,pd.subsidy,pd.carpark,meta.version]);
+    });
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(salesRows),'tbl_SALES');
+
+  // tbl_COST
+  const costRows=[['phase_code','code','report_no','description','pillar','budget','version_code']];
+  phases.forEach((p,i)=>{
+    const pd=readPhaseData(i), pc='P'+(i+1);
+    PILLARS.forEach(pl=>{
+      (pd.items[pl.code]||[]).forEach(item=>{
+        costRows.push([pc,item.code,item.no,item.desc,pLabelMap[pl.code],item.budget,meta.version]);
+      });
+    });
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(costRows),'tbl_COST');
+
+  // tbl_CURVE (fixed defaults)
+  const curveRows=[['phase_code','curve_type','Y0','Y1','Y2','Y3','Y4','version_code']];
+  phases.forEach((p,i)=>{
+    const pc='P'+(i+1);
+    curveRows.push([pc,'spend',0.10,0.30,0.35,0.20,0.05,meta.version]);
+    curveRows.push([pc,'collection',0.03,0.20,0.35,0.30,0.12,meta.version]);
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(curveRows),'tbl_CURVE');
+
+  XLSX.writeFile(wb,(meta.code||'NCT')+'_'+meta.version+'_Pipeline.xlsx');
+}
+
+// ---- Init ----
+const totalDiv=document.createElement('div');
+totalDiv.id='pc-total'; totalDiv.className='pc'; totalDiv.style.padding='20px';
+totalDiv.innerHTML='<p style="color:#aaa;padding:40px;text-align:center;font-size:15px">Enter data in the phases above to see the consolidated total.</p>';
+document.getElementById('phase-contents').appendChild(totalDiv);
+addPhase('Phase 1');
+</script>
+</body>
+</html>
