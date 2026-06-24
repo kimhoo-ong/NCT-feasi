@@ -10,22 +10,27 @@
 body{font-family:system-ui,-apple-system,sans-serif;background:#F0F2F5;color:#1a1a2e;font-size:14px}
 header{background:#0F3460;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 header h1{font-size:15px;font-weight:600}
-.hdr-r{display:flex;gap:8px;align-items:center}
-.hdr-link{color:rgba(255,255,255,.5);font-size:12px;text-decoration:none}.hdr-link:hover{color:#fff}
-.btn-r{padding:6px 13px;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
-.btn-r.red{background:#E94560}.btn-r.red:hover{background:#c73450}
-.btn-r.grn{background:#10B981}.btn-r.grn:hover{background:#059669}
+.hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{padding:6px 13px;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
+.btn.red{background:#E94560}.btn.red:hover{background:#c73450}
+.btn.grn{background:#10B981}.btn.grn:hover{background:#059669}
+.btn.blue{background:#3b82f6}.btn.blue:hover{background:#2563eb}
+.btn.ghost{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3)}.btn.ghost:hover{background:rgba(255,255,255,.25)}
+
 /* Meta */
 .meta-wrap{background:#fff;border-bottom:1px solid #ddd}
 .meta-toggle{padding:9px 20px;cursor:pointer;font-size:12px;font-weight:600;color:#0F3460;display:flex;align-items:center;gap:6px;user-select:none}
 .meta-toggle:hover{background:#f5f7ff}
 .meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 20px 16px}
+@media(max-width:600px){.meta-grid{grid-template-columns:repeat(2,1fr)}}
 .mf label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:3px}
 .mf input,.mf select{width:100%;padding:6px 9px;border:1.5px solid #ddd;border-radius:5px;font-size:12px;outline:none;background:#fff;color:#1a1a2e}
 .mf input:focus,.mf select:focus{border-color:#0F3460}
+
 /* Breadcrumb */
-.hb{background:#E8F0FE;padding:6px 20px;font-size:11px;color:#0F3460;display:flex;gap:6px;align-items:center;border-bottom:1px solid #c9d7f5}
+.hb{background:#E8F0FE;padding:6px 20px;font-size:11px;color:#0F3460;display:flex;gap:6px;align-items:center;border-bottom:1px solid #c9d7f5;flex-wrap:wrap}
 .hb-sep{color:#aaa}
+
 /* Phase tabs */
 .phase-tabs{display:flex;border-bottom:2px solid #0F3460;background:#fff;overflow-x:auto}
 .ptab{padding:9px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:500;color:#666;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
@@ -35,15 +40,19 @@ header h1{font-size:15px;font-weight:600}
 .ptab-add:hover{color:#E94560}
 .ptab-total{padding:9px 18px;border:none;background:none;cursor:pointer;font-size:13px;color:#666;border-bottom:3px solid transparent;margin-bottom:-2px;border-left:2px solid #e0e0e0;font-weight:500}
 .ptab-total.active{color:#0F3460;border-bottom-color:#E94560;font-weight:600}
+
 /* Phase pane */
-.pc{display:none;padding:16px;max-width:1400px;margin:0 auto}
+.pc{display:none;padding:16px;max-width:1600px;margin:0 auto}
 .pc.active{display:block}
+
 /* KPI bar */
 .kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:600px){.kpi-bar{grid-template-columns:repeat(2,1fr)}}
 .kpi-card{background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .kpi-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#aaa;margin-bottom:3px}
 .kpi-val{font-size:20px;font-weight:700;color:#0F3460}
 .kpi-val.acc{color:#E94560}
+
 /* Sub-phase card */
 .sp-card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:14px;overflow:hidden}
 .sp-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:#fafbfc;border-bottom:1px solid #eee;gap:8px}
@@ -53,42 +62,66 @@ header h1{font-size:15px;font-weight:600}
 .sp-name:focus{border-bottom:1.5px solid #0F3460}
 .sp-hdr-r{display:flex;align-items:center;gap:10px}
 .sp-kpi{font-size:12px;font-weight:600;color:#0F3460;white-space:nowrap}
-.tog{background:#f0f2f5;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:11px;flex-shrink:0}
+.tog{background:#f0f2f5;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:11px;flex-shrink:0;transition:transform .15s}
 .tog.coll{transform:rotate(-90deg)}
-.sp-body{padding:12px 14px}
-/* Matrix (L5 GDV) */
-.matrix-wrap{overflow-x:auto;margin-bottom:10px;border:1px solid #eee;border-radius:6px}
+
+/* Common cost bar */
+.cc-sec{border-bottom:1px solid #eee;background:#fffdf5}
+.cc-hdr{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;user-select:none}
+.cc-hdr:hover{background:#fff8e8}
+.cc-chevron{font-size:10px;color:#aaa;width:14px;display:inline-block}
+.cc-body{padding:0 14px 10px}
+.cc-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.cc-tbl th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#aaa;border-bottom:1px solid #eee;padding:4px 6px}
+.cc-tbl td{padding:3px 4px;vertical-align:middle}
+.cc-tbl select.inp{width:100%;font-size:11px}
+
+/* Unified matrix */
+.matrix-wrap{overflow-x:auto}
 .mtx{border-collapse:collapse;font-size:12px;min-width:100%;background:#fff}
-.mtx th,.mtx td{border:1px solid #eee;padding:6px 10px;white-space:nowrap;vertical-align:middle}
+.mtx th,.mtx td{border:1px solid #eee;padding:5px 9px;white-space:nowrap;vertical-align:middle}
 .mtx thead th{background:#fafbfc;font-size:11px;font-weight:600;color:#555;text-align:center}
-.mtx .attr-col{text-align:left;min-width:160px;background:#fafbfc;color:#555;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-right:2px solid #e8eaed}
-.mtx .comp-th{background:#fff;min-width:140px;text-align:center}
+.mtx .attr-col{text-align:left;min-width:170px;background:#fafbfc;color:#555;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-right:2px solid #e8eaed;position:sticky;left:0;z-index:1}
+.mtx .comp-th{background:#fff;min-width:130px;text-align:center}
 .mtx .comp-hdr{display:flex;align-items:center;gap:4px;justify-content:center}
-.mtx .add-th{background:#fff;text-align:center;min-width:80px}
+.mtx .add-th{background:#fff;text-align:center;min-width:70px}
 .mtx .total-th{background:#E8F0FE;color:#0F3460;font-weight:700;min-width:120px;text-align:center;border-left:2px solid #c9d7f5}
 .mtx tbody td{text-align:right}
-.mtx tbody .attr-col{text-align:left}
-.mtx tbody td.cpd{background:#fafbff;color:#0F3460;font-weight:600}
-.mtx tbody td.tcpd{background:#E8F0FE;color:#0F3460;font-weight:700;border-left:2px solid #c9d7f5}
-.mtx .sep-row td,.mtx .sep-row th{background:#f5f7ff;border-top:2px solid #0F3460;padding:3px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#0F3460;font-weight:700}
-.mtx .gdc-row td.cpd{background:#fff8f0;color:#c45}
-.mtx .gdc-row td.tcpd{background:#fdecea;color:#c45;border-left:2px solid #f5c6c0}
-.mtx .pbt-row td.cpd{background:#f0fff8;color:#0a7}
-.mtx .pbt-row td.tcpd{background:#d4f5e9;color:#0a7;border-left:2px solid #a8e5cc}
-.mtx .mg-row td.cpd{background:#fff;color:#555}
-.mtx .mg-row td.tcpd{background:#E8F0FE;color:#0F3460;border-left:2px solid #c9d7f5}
-/* Deductions */
-.ded-wrap{border-top:2px solid #f0f0f0;margin-top:2px}
-.dt{width:100%;border-collapse:collapse;font-size:13px}
-.dt th{padding:7px 10px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#888;background:#fafbfc;border-bottom:1px solid #eee;white-space:nowrap}
-.dt th.r,.dt td.r{text-align:right}
-.dt td{padding:6px 10px;border-bottom:1px solid #f0f0f0}
-.dt tr:last-child td{border-bottom:none}
-.dt .tr-total td{font-weight:700;background:#f5f7ff;color:#0F3460}
-.dt .tr-ded td{color:#E94560}
-.num{font-variant-numeric:tabular-nums}
+.mtx tbody .attr-col{text-align:left;background:#fafbfc;position:sticky;left:0;z-index:1}
+
+/* Section separators */
+.mtx .sec-row td,.mtx .sec-row th{background:#0F3460;color:#fff;padding:4px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;border-color:#0F3460}
+.mtx .sec-row.cost td,.mtx .sec-row.cost th{background:#1a1a2e}
+
+/* Cell types */
+.mtx td.cpd{background:#fafbff;color:#0F3460;font-weight:600}
+.mtx td.tcpd{background:#E8F0FE;color:#0F3460;font-weight:700;border-left:2px solid #c9d7f5}
+.mtx .total-row td{background:#E8F0FE;color:#0F3460;font-weight:700;border-top:2px solid #c9d7f5}
+.mtx .total-row td.tcpd{border-left:2px solid #c9d7f5}
+.mtx td.pbt-cell{background:#f0fff8;color:#059669;font-weight:700}
+.mtx td.pbt-total{background:#d4f5e9;color:#059669;font-weight:700;border-left:2px solid #a8e5cc}
+.mtx td.mg-cell{background:#fff;color:#555;font-weight:600}
+.mtx td.mg-total{background:#E8F0FE;color:#0F3460;font-weight:700;border-left:2px solid #c9d7f5}
+.mtx td.gdc-cell{background:#fff8f0;color:#c45;font-weight:600}
+.mtx td.gdc-total{background:#fdecea;color:#c45;font-weight:700;border-left:2px solid #f5c6c0}
+.mtx td.cc-cell{background:#fffcf0;color:#b45309;font-weight:600}
+.mtx td.cc-total{background:#fef3c7;color:#b45309;font-weight:700;border-left:2px solid #fde68a}
+
+/* Pillar rows */
+.mtx .pillar-row td{background:#f5f7ff;cursor:pointer}
+.mtx .pillar-row td:first-child{font-weight:700;color:#0F3460;font-size:11px;padding-left:6px}
+.mtx .pillar-row:hover td{background:#e8f0fe}
+.mtx .pillar-row td.tcpd{background:#E8F0FE}
+.mtx .item-row{display:none}
+.mtx .item-row.open{display:table-row}
+.mtx .item-row td.attr-col{padding-left:18px;font-weight:400;color:#555;font-size:11px;text-transform:none;letter-spacing:0}
+.mtx .item-row td{background:#fff}
+.mtx .item-add-row{display:none}
+.mtx .item-add-row.open{display:table-row}
+.mtx .item-add-row td{background:#fafbfc;border-top:1px dashed #ccc}
+
 /* Inputs */
-.inp{padding:4px 7px;border:1.5px solid #ddd;border-radius:4px;font-size:12px;outline:none;background:#fff;color:#1a1a2e}
+.inp{padding:4px 7px;border:1.5px solid #ddd;border-radius:4px;font-size:12px;outline:none;background:#fff;color:#1a1a2e;width:100%}
 .inp:focus{border-color:#0F3460}
 .inp.r{text-align:right}
 .inp.mono{font-family:monospace;font-size:11px}
@@ -97,22 +130,25 @@ select.inp{cursor:pointer;padding:3px 5px}
 .rm-btn:hover{color:#E94560;background:#fee}
 .add-btn{display:inline-flex;align-items:center;gap:4px;margin:8px 10px;padding:5px 13px;background:#f0f2f5;border:1.5px dashed #bbb;border-radius:6px;cursor:pointer;font-size:12px;color:#555;font-weight:500}
 .add-btn:hover{background:#E8F0FE;border-color:#0F3460;color:#0F3460}
-.add-btn-sm{padding:3px 10px;background:#f0f2f5;border:1.5px dashed #bbb;border-radius:5px;cursor:pointer;font-size:11px;color:#555;font-weight:500;white-space:nowrap}
+.add-btn-sm{padding:3px 9px;background:#f0f2f5;border:1.5px dashed #bbb;border-radius:5px;cursor:pointer;font-size:11px;color:#555;font-weight:500;white-space:nowrap}
 .add-btn-sm:hover{background:#E8F0FE;border-color:#0F3460;color:#0F3460}
-/* GDC per-component tabs */
-.gdc-comp-tabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
-.gdc-ctab{padding:4px 12px;border:1.5px solid #ddd;border-radius:5px;cursor:pointer;font-size:12px;background:#fff;color:#555;font-weight:500;white-space:nowrap}
-.gdc-ctab.active{background:#E8F0FE;border-color:#0F3460;color:#0F3460;font-weight:600}
-.gdc-panel{display:none}
-.gdc-panel.active{display:block}
-/* Pillar */
-.pill-card{border:1px solid #eee;border-radius:6px;margin-bottom:8px;overflow:hidden}
-.pill-hdr{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;background:#fafbfc;border-bottom:1px solid #eee;cursor:pointer}
-.pill-hdr h4{font-size:12px;font-weight:600;color:#0F3460;display:flex;align-items:center;gap:6px}
-.ptag{font-size:10px;background:#E8F0FE;color:#0F3460;padding:1px 6px;border-radius:3px;font-weight:700}
-.pill-sub{font-size:12px;font-weight:700;color:#0F3460}
-/* Section label */
-.sec-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#888;padding:12px 0 6px;border-bottom:1px solid #eee;margin-bottom:10px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Load modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:10px;width:560px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal-hdr{padding:14px 18px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.modal-hdr h3{font-size:14px;font-weight:600;color:#0F3460}
+.modal-list{flex:1;overflow-y:auto;padding:8px 0}
+.modal-row{padding:10px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid #f0f0f0}
+.modal-row:hover{background:#f5f7ff}
+.modal-row:last-child{border-bottom:none}
+.modal-name{font-size:13px;font-weight:600;color:#1a1a2e;flex:1}
+.modal-stage{font-size:11px;background:#E8F0FE;color:#0F3460;padding:2px 8px;border-radius:4px;font-weight:600}
+.modal-date{font-size:11px;color:#aaa;white-space:nowrap}
+.modal-empty{padding:32px;text-align:center;color:#aaa;font-size:13px}
+.modal-footer{padding:10px 18px;border-top:1px solid #eee;display:flex;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -120,9 +156,10 @@ select.inp{cursor:pointer;padding:3px 5px}
 <header>
   <h1>NCT Feasibility · Input Tool</h1>
   <div class="hdr-r">
-    <a href="NCT_Feasi_Demo.html" class="hdr-link">← View Demo</a>
-    <button class="btn-r red" onclick="downloadReport()">⬇ Report Excel</button>
-    <button class="btn-r grn" onclick="downloadPipeline()">⬇ Pipeline Excel</button>
+    <button class="btn ghost" onclick="openLoad()">⬆ Load</button>
+    <button class="btn ghost" onclick="saveSnapshot()">💾 Save</button>
+    <button class="btn red" onclick="downloadReport()">⬇ Report</button>
+    <button class="btn grn" onclick="downloadPipeline()">⬇ Pipeline</button>
   </div>
 </header>
 
@@ -135,10 +172,17 @@ select.inp{cursor:pointer;padding:3px 5px}
       <div class="mf"><label>L2 Plot Name / Location</label><input id="m-loc" placeholder="e.g. Shah Alam, Selangor"></div>
       <div class="mf"><label>Project Code</label><input id="m-code" placeholder="e.g. NCT-P001"></div>
       <div class="mf"><label>Project Name</label><input id="m-name" placeholder="e.g. Residensi Aman"></div>
-      <div class="mf"><label>Version Code</label><input id="m-ver" placeholder="V01" value="V01"></div>
+      <div class="mf"><label>Stage</label>
+        <select id="m-stage">
+          <option value="BD">BD — Business Development</option>
+          <option value="R1">R1 — Revision 1</option>
+          <option value="R2">R2 — Revision 2</option>
+          <option value="R3">R3 — Revision 3</option>
+        </select>
+      </div>
       <div class="mf"><label>Scenario</label><select id="m-scen"><option>Base</option><option>Optimistic</option><option>Stress</option></select></div>
       <div class="mf"><label>Status</label><select id="m-stat"><option>Draft</option><option>Approved</option><option>Archived</option></select></div>
-      <div class="mf"><label>Version Date</label><input id="m-date" type="date" value="2026-06-22"></div>
+      <div class="mf"><label>Version Date</label><input id="m-date" type="date" value="2026-06-23"></div>
       <div class="mf"><label>WACC (%)</label><input id="m-wacc" type="number" value="8.0" step="0.1"></div>
     </div>
   </div>
@@ -148,39 +192,53 @@ select.inp{cursor:pointer;padding:3px 5px}
   <span id="hb-l1">L1: —</span><span class="hb-sep">›</span>
   <span id="hb-l2">L2: —</span><span class="hb-sep">›</span>
   <span id="hb-l3">L3: Phase</span>
-  <span class="hb-sep">›</span><span style="color:#aaa">L4: Sub-phase  ›  L5: Building Component</span>
+  <span class="hb-sep">›</span><span style="color:#aaa">L4: Sub-phase › L5: Component</span>
 </div>
 
 <div class="phase-tabs" id="phase-tabs"></div>
 <div id="phase-contents"></div>
 
-<script>
-const R = n => (isNaN(n)||!isFinite(n))?0:n;
-const fmt = n => 'RM '+R(Math.round(n)).toLocaleString();
-const fmtM = n => 'RM '+(R(n)/1e6).toFixed(2)+'M';
-const fmtAmt = n => n?fmt(n):'—';
-const fmtPsf = (n,nfa) => nfa>0?R(n/nfa).toFixed(1):'—';
-const fmtPct = (n,gdv) => gdv>0?(R(n/gdv)*100).toFixed(2)+'%':'—';
+<!-- Load modal -->
+<div class="modal-bg" id="load-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>Load Feasibility</h3>
+      <button class="rm-btn" style="font-size:18px" onclick="closeLoad()">✕</button>
+    </div>
+    <div class="modal-list" id="modal-list"></div>
+    <div class="modal-footer">
+      <button class="btn ghost" style="background:#f0f2f5;color:#555;border:1.5px solid #ddd" onclick="closeLoad()">Cancel</button>
+    </div>
+  </div>
+</div>
 
-let phases=[]; let spCount={}; let compCount={};
-let computedSP={}; let computedP={};
+<script>
+const R=n=>(isNaN(n)||!isFinite(n))?0:n;
+const fmt=n=>'RM '+R(Math.round(n)).toLocaleString();
+const fmtM=n=>'RM '+(R(n)/1e6).toFixed(2)+'M';
+const fmtAmt=n=>n?fmt(n):'—';
+const fmtPsf=(n,nfa)=>nfa>0?R(n/nfa).toFixed(1):'—';
+const fmtPct=(n,gdv)=>gdv>0?(R(n/gdv)*100).toFixed(2)+'%':'—';
+
+let phases=[];let spCount={};let compCount={};
+let computedSP={};let computedP={};
 let currentTab=0;
 
 const PILLARS=[
-  {code:'P1',name:'Land Cost',prefix:'L',items:[['L.PURCHASE','1.1','Land Purchase'],['L.STAMP','1.2','Stamp Duty'],['L.LEGAL','1.3','Legal Fees'],['L.CONV','1.4','Land Conversion Premium'],['L.HOLD','1.5','Holding Cost']]},
-  {code:'P2',name:'Construction Cost',prefix:'C',items:[['C.PILE','2.1','Piling Works'],['C.SUB','2.2','Substructure'],['C.SUPER_CS','2.3','Superstructure (C&S)'],['C.ARCH','2.4','Architectural Finishes'],['C.MEP_MECH','2.5','M&E — Mechanical'],['C.MEP_ELEC','2.6','M&E — Electrical'],['C.PLUMB','2.7','Plumbing & Sanitary'],['C.CONT','2.8','Contingency']]},
-  {code:'P3',name:'Infrastructure',prefix:'I',items:[['I.ROAD_INT','3.1','Internal Road Works'],['I.DRAIN','3.2','Drainage'],['I.TNB','3.3','TNB Substation'],['I.WATER','3.4','Water Reticulation'],['I.SEWER','3.5','Sewerage (IWK)'],['I.DEVCON','3.6','Development Contribution']]},
+  {code:'P1',name:'Land Cost',     prefix:'L',items:[['L.PURCHASE','1.1','Land Purchase'],['L.STAMP','1.2','Stamp Duty'],['L.LEGAL','1.3','Legal Fees'],['L.CONV','1.4','Land Conversion Premium'],['L.HOLD','1.5','Holding Cost']]},
+  {code:'P2',name:'Construction',  prefix:'C',items:[['C.PILE','2.1','Piling Works'],['C.SUB','2.2','Substructure'],['C.SUPER_CS','2.3','Superstructure (C&S)'],['C.ARCH','2.4','Architectural Finishes'],['C.MEP_MECH','2.5','M&E — Mechanical'],['C.MEP_ELEC','2.6','M&E — Electrical'],['C.PLUMB','2.7','Plumbing & Sanitary'],['C.CONT','2.8','Contingency']]},
+  {code:'P3',name:'Infrastructure', prefix:'I',items:[['I.ROAD_INT','3.1','Internal Road Works'],['I.DRAIN','3.2','Drainage'],['I.TNB','3.3','TNB Substation'],['I.WATER','3.4','Water Reticulation'],['I.SEWER','3.5','Sewerage (IWK)'],['I.DEVCON','3.6','Development Contribution']]},
   {code:'P4',name:'Professional Fees',prefix:'P',items:[['P.ARCH','4.1','Architect Fee'],['P.STRUCT','4.2','Structural Engineer'],['P.MEP','4.3','M&E Engineer'],['P.QS','4.4','Quantity Surveyor'],['P.SURVEY','4.5','Licensed Surveyor'],['P.LEGAL','4.6','Legal (End-Financier)']]},
-  {code:'P5',name:'Finance, Sales & Marketing',prefix:'F',items:[['F.IDC','5.1','Interest During Construction'],['F.LOANFEE','5.2','Loan Arrangement Fee'],['F.GALLERY','5.3','Sales Gallery Setup'],['F.MKT','5.4','Marketing & Advertising'],['F.AGENT','5.5','Agent Commission'],['F.PM','5.6','Project Management']]},
+  {code:'P5',name:'Finance, Sales & Mkt',prefix:'F',items:[['F.IDC','5.1','Interest During Construction'],['F.LOANFEE','5.2','Loan Arrangement Fee'],['F.GALLERY','5.3','Sales Gallery Setup'],['F.MKT','5.4','Marketing & Advertising'],['F.AGENT','5.5','Agent Commission'],['F.PM','5.6','Project Management']]},
 ];
 
-// ──────────── Phase (L3) ────────────
+// ─── Phase (L3) ───
 function addPhase(name){
   const pIdx=phases.length;
   phases.push({name:name||'Phase '+(pIdx+1)});
-  spCount[pIdx]=0; compCount[pIdx]={}; computedSP[pIdx]={};
+  spCount[pIdx]=0;compCount[pIdx]={};computedSP[pIdx]={};
   const div=document.createElement('div');
-  div.id='pc-'+pIdx; div.className='pc';
+  div.id='pc-'+pIdx;div.className='pc';
   div.innerHTML=`
     <div class="kpi-bar">
       <div class="kpi-card"><div class="kpi-lbl">Net GDV</div><div class="kpi-val kpi-gdv">—</div></div>
@@ -191,15 +249,15 @@ function addPhase(name){
     <div id="sp-list-${pIdx}"></div>
     <button class="add-btn" onclick="addSubphase(${pIdx})">+ Add Sub-phase (L4)</button>`;
   document.getElementById('phase-contents').appendChild(div);
-  renderTabs(); addSubphase(pIdx,'Sub-phase A'); switchTab(pIdx);
+  renderTabs();addSubphase(pIdx,'Sub-phase A');switchTab(pIdx);
 }
 
 function switchTab(idx){
   document.querySelectorAll('.pc').forEach(el=>el.classList.remove('active'));
   currentTab=idx;
   if(idx==='total'){document.getElementById('pc-total').classList.add('active');renderTotal();}
-  else{document.getElementById('pc-'+idx)?.classList.add('active');}
-  renderTabs(); updateBreadcrumb();
+  else document.getElementById('pc-'+idx)?.classList.add('active');
+  renderTabs();updateBreadcrumb();
 }
 
 function renderTabs(){
@@ -221,7 +279,7 @@ function updateBreadcrumb(){
 document.getElementById('m-co').oninput=updateBreadcrumb;
 document.getElementById('m-plot').oninput=updateBreadcrumb;
 
-// ──────────── Sub-phase (L4) ────────────
+// ─── Sub-phase (L4) ───
 function addSubphase(pIdx,name){
   const spIdx=spCount[pIdx]++;
   const id='sp-'+pIdx+'-'+spIdx;
@@ -242,64 +300,54 @@ function addSubphase(pIdx,name){
       </div>
     </div>
     <div id="spb-${id}">
-      <div class="sp-body">
-        <div class="sec-title">L5 — Building Components</div>
-        <div class="matrix-wrap">
-          <table class="mtx" id="mtx-${pIdx}-${spIdx}">
-            <thead>
-              <tr id="mtx-hdr-${pIdx}-${spIdx}">
-                <th class="attr-col">Building Component (L5)</th>
-                <th class="add-th" id="mtx-add-th-${pIdx}-${spIdx}">
-                  <button class="add-btn-sm" onclick="addComponent(${pIdx},${spIdx})">+ Add</button>
-                </th>
-                <th class="total-th">TOTAL</th>
-              </tr>
-            </thead>
-            <tbody id="mtx-body-${pIdx}-${spIdx}">
-              <tr data-a="type"><td class="attr-col">Type</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
-              <tr data-a="units"><td class="attr-col">Units</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-              <tr data-a="nfa_u"><td class="attr-col">NFA / Unit (sqft)</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
-              <tr data-a="tnfa"><td class="attr-col">Total NFA (sqft)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-              <tr data-a="asp"><td class="attr-col">ASP (RM psf)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-              <tr data-a="gdv"><td class="attr-col">Gross GDV (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-              <tr class="sep-row"><td class="attr-col" colspan="10">Cost Summary (per component)</td></tr>
-              <tr data-a="gdc" class="gdc-row"><td class="attr-col">GDC (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-              <tr data-a="pbt" class="pbt-row"><td class="attr-col">PBT (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-              <tr data-a="margin" class="mg-row"><td class="attr-col">Margin</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-            </tbody>
-          </table>
+      <div class="cc-sec" id="cc-sec-${pIdx}-${spIdx}">
+        <div class="cc-hdr" onclick="toggleCC(${pIdx},${spIdx})">
+          <span class="cc-chevron" id="cc-chev-${pIdx}-${spIdx}">▶</span>
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#888">Common Cost</span>
+          <span id="cc-sum-${pIdx}-${spIdx}" style="font-size:12px;color:#b45309;font-weight:700;margin-left:4px">RM 0</span>
+          <span style="font-size:11px;color:#aaa;margin-left:6px">↳ auto-allocated to components by NFA ratio</span>
         </div>
-
-        <div class="ded-wrap">
-          <table class="dt">
-            <tbody>
-              <tr><td style="min-width:180px"><strong>Gross GDV</strong></td><td style="min-width:220px"></td>
-                <td class="r num ggdv-val" style="min-width:130px">—</td><td class="r num ggdv-psf" style="min-width:90px">—</td></tr>
-              <tr class="tr-ded"><td>Less: Bumi Discount</td>
-                <td><input type="number" class="inp bumi-pct" placeholder="%" min="0" max="100" step="0.1" style="width:60px" oninput="csp(${pIdx},${spIdx})"> %</td>
-                <td class="r num bumi-val">—</td><td class="r num bumi-psf">—</td></tr>
-              <tr class="tr-ded"><td>Less: Affordable Cross-Subsidy</td>
-                <td><input type="number" class="inp subsidy-amt" placeholder="RM" min="0" style="width:130px" oninput="csp(${pIdx},${spIdx})"></td>
-                <td class="r num sub-val">—</td><td class="r num sub-psf">—</td></tr>
-              <tr><td>Add: Carpark Revenue</td>
-                <td><input type="number" class="inp cpark-amt" placeholder="RM" min="0" style="width:130px" oninput="csp(${pIdx},${spIdx})"></td>
-                <td class="r num cpark-val">—</td><td class="r num cpark-psf">—</td></tr>
-              <tr class="tr-total"><td colspan="2"><strong>Net GDV</strong></td>
-                <td class="r num ngdv-val">—</td><td class="r num ngdv-psf">—</td></tr>
-            </tbody>
+        <div class="cc-body" id="cc-body-${pIdx}-${spIdx}" style="display:none">
+          <table class="cc-tbl">
+            <thead><tr>
+              <th style="width:130px">Pillar</th>
+              <th style="width:90px">Code</th>
+              <th>Description</th>
+              <th style="width:130px">Amount (RM)</th>
+              <th style="width:28px"></th>
+            </tr></thead>
+            <tbody id="cc-rows-${pIdx}-${spIdx}"></tbody>
           </table>
+          <button class="add-btn" style="margin:6px 14px 4px" onclick="addCCItem(${pIdx},${spIdx})">+ Add Common Cost Item</button>
         </div>
-
-        <div class="sec-title" style="margin-top:14px">GDC — Cost by Component (L5)</div>
-        <div class="gdc-comp-tabs" id="ctabs-${pIdx}-${spIdx}"></div>
-        <div id="cpanels-${pIdx}-${spIdx}"></div>
-
-        <table class="dt" style="margin-top:10px">
-          <thead><tr><th>Profit Summary (Sub-phase)</th><th class="r">Amount (RM)</th><th class="r">PSF (RM)</th><th class="r">% of GDV</th></tr></thead>
-          <tbody>
-            <tr><td>Net GDV</td><td class="r num psum-gdv">—</td><td class="r num psum-gdv-psf">—</td><td class="r">100.00%</td></tr>
-            <tr class="tr-ded"><td>Less: GDC</td><td class="r num psum-gdc">—</td><td class="r num psum-gdc-psf">—</td><td class="r psum-gdc-pct">—</td></tr>
-            <tr class="tr-total"><td>Profit (PBT)</td><td class="r num psum-pbt">—</td><td class="r num psum-pbt-psf">—</td><td class="r psum-pbt-pct">—</td></tr>
+      </div>
+      <div class="matrix-wrap">
+        <table class="mtx" id="mtx-${pIdx}-${spIdx}">
+          <thead>
+            <tr id="mtx-hdr-${pIdx}-${spIdx}">
+              <th class="attr-col">Attribute</th>
+              <th class="add-th" id="mtx-add-th-${pIdx}-${spIdx}">
+                <button class="add-btn-sm" onclick="addComponent(${pIdx},${spIdx})">+ Add</button>
+              </th>
+              <th class="total-th">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody id="mtx-body-${pIdx}-${spIdx}">
+            <!-- SALES section -->
+            <tr class="sec-row"><td class="attr-col" colspan="20">▸ Sales</td></tr>
+            <tr data-a="type"><td class="attr-col">Type</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
+            <tr data-a="units"><td class="attr-col">Units</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="nfa_u"><td class="attr-col">NFA / Unit (sqft)</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
+            <tr data-a="tnfa"><td class="attr-col">Total NFA (sqft)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="asp"><td class="attr-col">ASP (RM psf)</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
+            <tr data-a="ggdv"><td class="attr-col">Gross GDV (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="bumi_pct"><td class="attr-col">Bumi Discount (%)</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
+            <tr data-a="bumi_amt"><td class="attr-col">Bumi Amt (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="subsidy"><td class="attr-col">Cross-subsidy (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="carpark"><td class="attr-col">Carpark Revenue (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="ngdv" class="total-row"><td class="attr-col" style="color:#0F3460;font-weight:700">Net GDV (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <!-- COST section -->
+            <tr class="sec-row cost"><td class="attr-col" colspan="20">▸ Cost</td></tr>
           </tbody>
         </table>
       </div>
@@ -307,6 +355,8 @@ function addSubphase(pIdx,name){
   </div>`;
 
   document.getElementById('sp-list-'+pIdx).insertAdjacentHTML('beforeend',html);
+  // Build pillar rows in table body
+  buildPillarRows(pIdx,spIdx);
   addComponent(pIdx,spIdx);
 }
 
@@ -317,7 +367,76 @@ function toggleSP(id){
   const v=b.style.display!=='none';b.style.display=v?'none':'';t.classList.toggle('coll',v);
 }
 
-// ──────────── Component (L5) ────────────
+// ─── Build pillar rows (shared across all components) ───
+function buildPillarRows(pIdx,spIdx){
+  const tbody=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
+  PILLARS.forEach(p=>{
+    // Pillar header row
+    const pRow=document.createElement('tr');
+    pRow.className='pillar-row';
+    pRow.id='prow-'+pIdx+'-'+spIdx+'-'+p.code;
+    pRow.dataset.open='1';
+    pRow.onclick=()=>togglePillar(pIdx,spIdx,p.code);
+    pRow.innerHTML=`<td class="attr-col">▼ ${p.code} — ${p.name}</td><td class="add-spacer"></td><td class="tcpd num">—</td>`;
+    tbody.appendChild(pRow);
+    // Default item rows — start open
+    p.items.forEach(([code,no,desc],iIdx)=>{
+      const r=makeItemRow(pIdx,spIdx,p.code,iIdx,code,no,desc);
+      r.classList.add('open');
+      tbody.appendChild(r);
+    });
+    // Add-item row — start open
+    const addRow=document.createElement('tr');
+    addRow.className='item-add-row open';
+    addRow.id='iadd-'+pIdx+'-'+spIdx+'-'+p.code;
+    addRow.innerHTML=`<td class="attr-col" colspan="20" style="padding:4px 14px">
+      <button class="add-btn-sm" onclick="addPillarItem(${pIdx},${spIdx},'${p.code}','${p.prefix}')">+ Add item</button>
+    </td>`;
+    tbody.appendChild(addRow);
+  });
+
+  // GDC total, PBT, Margin rows
+  const gdcRow=document.createElement('tr');
+  gdcRow.dataset.a='gdc_total';
+  gdcRow.className='total-row';
+  gdcRow.innerHTML=`<td class="attr-col" style="color:#c45;font-weight:700">Total GDC (RM)</td><td class="add-spacer"></td><td class="gdc-total num">—</td>`;
+  tbody.appendChild(gdcRow);
+
+  const pbtRow=document.createElement('tr');
+  pbtRow.dataset.a='pbt';
+  pbtRow.innerHTML=`<td class="attr-col" style="color:#059669;font-weight:700">PBT (RM)</td><td class="add-spacer"></td><td class="pbt-total num">—</td>`;
+  tbody.appendChild(pbtRow);
+
+  const mgRow=document.createElement('tr');
+  mgRow.dataset.a='margin';
+  mgRow.innerHTML=`<td class="attr-col" style="font-weight:700">Margin</td><td class="add-spacer"></td><td class="mg-total num">—</td>`;
+  tbody.appendChild(mgRow);
+}
+
+function makeItemRow(pIdx,spIdx,pCode,iIdx,code,no,desc){
+  const tr=document.createElement('tr');
+  tr.className='item-row';
+  tr.id='irow-'+pIdx+'-'+spIdx+'-'+pCode+'-'+iIdx;
+  tr.dataset.pillar=pCode;
+  tr.dataset.iidx=iIdx;
+  tr.innerHTML=`<td class="attr-col">
+    <input type="text" class="inp mono i-code" value="${code}" placeholder="CODE" style="width:80px" oninput="csp(${pIdx},${spIdx})">
+    <input type="text" class="inp i-desc" value="${desc}" placeholder="Description" style="width:140px;margin-left:4px" oninput="csp(${pIdx},${spIdx})">
+  </td><td class="add-spacer"></td><td class="tcpd num i-total">—</td>`;
+  return tr;
+}
+
+function togglePillar(pIdx,spIdx,pCode){
+  const pRow=document.getElementById('prow-'+pIdx+'-'+spIdx+'-'+pCode);
+  const isOpen=pRow.dataset.open==='1';
+  pRow.dataset.open=isOpen?'0':'1';
+  const icon=isOpen?'▶':'▼';
+  pRow.querySelector('td.attr-col').textContent=icon+' '+pCode+' — '+PILLARS.find(p=>p.code===pCode).name;
+  document.getElementById('mtx-body-'+pIdx+'-'+spIdx).querySelectorAll('.item-row[data-pillar="'+pCode+'"],.item-add-row#iadd-'+pIdx+'-'+spIdx+'-'+pCode)
+    .forEach(r=>r.classList.toggle('open',!isOpen));
+}
+
+// ─── Component (L5) ───
 function addComponent(pIdx,spIdx){
   const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
   const addTh=document.getElementById('mtx-add-th-'+pIdx+'-'+spIdx);
@@ -326,217 +445,281 @@ function addComponent(pIdx,spIdx){
   const visIdx=hdrRow.querySelectorAll('.comp-th').length;
   const defName='Component '+(visIdx+1);
 
-  // Matrix header TH
+  // Header TH
   const th=document.createElement('th');
-  th.className='comp-th'; th.dataset.cid=cIdx;
-  th.innerHTML=`<div class="comp-hdr"><input type="text" class="inp c-name" value="${defName}" style="width:95px"
-    oninput="syncCompTab(${pIdx},${spIdx},${cIdx},this.value);csp(${pIdx},${spIdx})">
-    <button class="rm-btn" onclick="removeComponent(${pIdx},${spIdx},${cIdx})">✕</button></div>`;
+  th.className='comp-th';th.dataset.cid=cIdx;
+  th.innerHTML=`<div class="comp-hdr">
+    <input type="text" class="inp c-name" value="${defName}" style="width:90px"
+      oninput="syncCompName(${pIdx},${spIdx},${cIdx},this.value);csp(${pIdx},${spIdx})">
+    <button class="rm-btn" onclick="removeComponent(${pIdx},${spIdx},${cIdx})">✕</button>
+  </div>`;
   hdrRow.insertBefore(th,addTh);
 
-  // Matrix body TDs
+  // Add TD to every data row (skip item rows — handled separately below)
   body.querySelectorAll('tr').forEach(row=>{
+    if(row.classList.contains('item-row')||row.classList.contains('item-add-row'))return;
     const a=row.getAttribute('data-a');
-    const spacer=row.querySelector('.add-spacer');if(!spacer)return;
+    const spacer=row.querySelector('.add-spacer');
+    if(!spacer)return;
     const td=document.createElement('td');
     td.dataset.cid=cIdx;
-    if(a==='type') td.innerHTML=`<select class="inp c-type" onchange="csp(${pIdx},${spIdx})"><option>Residential</option><option>Commercial</option><option>Carpark</option><option>Hotel</option><option>Industrial</option></select>`;
-    else if(a==='units') td.innerHTML=`<input type="number" class="inp r c-units" placeholder="0" min="0" style="width:80px" oninput="csp(${pIdx},${spIdx})">`;
-    else if(a==='nfa_u') td.innerHTML=`<input type="number" class="inp r c-nfa" placeholder="sqft" min="0" style="width:80px" oninput="csp(${pIdx},${spIdx})">`;
-    else if(a==='asp')   td.innerHTML=`<input type="number" class="inp r c-asp" placeholder="RM psf" min="0" style="width:80px" oninput="csp(${pIdx},${spIdx})">`;
-    else if(['tnfa','gdv','gdc','pbt','margin'].includes(a)){td.className='cpd num';td.textContent='—';}
+    if(a==='type')
+      td.innerHTML=`<select class="inp c-type" onchange="csp(${pIdx},${spIdx})"><option>Residential</option><option>Commercial</option><option>Carpark</option><option>Hotel</option><option>Industrial</option></select>`;
+    else if(a==='units')
+      td.innerHTML=`<input type="number" class="inp r c-units" placeholder="0" min="0" style="width:75px" oninput="csp(${pIdx},${spIdx})">`;
+    else if(a==='nfa_u')
+      td.innerHTML=`<input type="number" class="inp r c-nfa" placeholder="sqft" min="0" style="width:75px" oninput="csp(${pIdx},${spIdx})">`;
+    else if(a==='asp')
+      td.innerHTML=`<input type="number" class="inp r c-asp" placeholder="RM psf" min="0" style="width:75px" oninput="csp(${pIdx},${spIdx})">`;
+    else if(a==='bumi_pct')
+      td.innerHTML=`<input type="number" class="inp r c-bumi" placeholder="%" min="0" max="100" step="0.1" style="width:65px" oninput="csp(${pIdx},${spIdx})">`;
+    else if(a==='subsidy')
+      td.innerHTML=`<input type="number" class="inp r c-subsidy" placeholder="RM" min="0" style="width:75px" oninput="csp(${pIdx},${spIdx})">`;
+    else if(a==='carpark')
+      td.innerHTML=`<input type="number" class="inp r c-carpark" placeholder="RM" min="0" style="width:75px" oninput="csp(${pIdx},${spIdx})">`;
+    else if(['tnfa','ggdv','bumi_amt','ngdv'].includes(a)){td.className='cpd num';td.textContent='—';}
+    else if(a==='gdc_total'){td.className='gdc-cell num';td.textContent='—';}
+    else if(a==='pbt'){td.className='pbt-cell num';td.textContent='—';}
+    else if(a==='margin'){td.className='mg-cell num';td.textContent='—';}
     row.insertBefore(td,spacer);
   });
 
-  // GDC tab + panel
-  const tabsEl=document.getElementById('ctabs-'+pIdx+'-'+spIdx);
-  const panelsEl=document.getElementById('cpanels-'+pIdx+'-'+spIdx);
-  const isFirst=tabsEl.children.length===0;
-
-  const tab=document.createElement('button');
-  tab.className='gdc-ctab'+(isFirst?' active':'');
-  tab.id='ctab-'+pIdx+'-'+spIdx+'-'+cIdx;
-  tab.textContent=defName;
-  tab.onclick=()=>switchCompTab(pIdx,spIdx,cIdx);
-  tabsEl.appendChild(tab);
-
-  const panel=document.createElement('div');
-  panel.className='gdc-panel'+(isFirst?' active':'');
-  panel.id='cpanel-'+pIdx+'-'+spIdx+'-'+cIdx;
-  panel.innerHTML=buildPillarHTML(pIdx,spIdx,cIdx);
-  panelsEl.appendChild(panel);
+  // Add budget TDs to all item rows for this component
+  body.querySelectorAll('.item-row').forEach(row=>{
+    const spacer=row.querySelector('.add-spacer');if(!spacer)return;
+    const td=document.createElement('td');
+    td.dataset.cid=cIdx;
+    td.innerHTML=`<input type="number" class="inp r i-budget" placeholder="0" min="0" style="width:90px" oninput="csp(${pIdx},${spIdx})">`;
+    row.insertBefore(td,spacer);
+  });
 
   csp(pIdx,spIdx);
 }
 
 function removeComponent(pIdx,spIdx,cIdx){
-  document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx).querySelector('.comp-th[data-cid="'+cIdx+'"]')?.remove();
-  document.getElementById('mtx-body-'+pIdx+'-'+spIdx).querySelectorAll('td[data-cid="'+cIdx+'"]').forEach(td=>td.remove());
-  document.getElementById('ctab-'+pIdx+'-'+spIdx+'-'+cIdx)?.remove();
-  document.getElementById('cpanel-'+pIdx+'-'+spIdx+'-'+cIdx)?.remove();
-  // Activate first remaining tab
-  const tabsEl=document.getElementById('ctabs-'+pIdx+'-'+spIdx);
-  const panelsEl=document.getElementById('cpanels-'+pIdx+'-'+spIdx);
-  if(!tabsEl.querySelector('.active')&&tabsEl.firstElementChild){
-    tabsEl.firstElementChild.classList.add('active');
-    panelsEl.firstElementChild?.classList.add('active');
-  }
+  const hdr=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
+  const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
+  hdr.querySelector('.comp-th[data-cid="'+cIdx+'"]')?.remove();
+  body.querySelectorAll('td[data-cid="'+cIdx+'"]').forEach(td=>td.remove());
   csp(pIdx,spIdx);
 }
 
-function syncCompTab(pIdx,spIdx,cIdx,val){
-  const tab=document.getElementById('ctab-'+pIdx+'-'+spIdx+'-'+cIdx);
-  if(tab)tab.textContent=val||'Component';
+function syncCompName(pIdx,spIdx,cIdx,val){}
+
+// ─── Pillar items ───
+function addPillarItem(pIdx,spIdx,pCode,prefix){
+  const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
+  const addRow=document.getElementById('iadd-'+pIdx+'-'+spIdx+'-'+pCode);
+  const existingItems=body.querySelectorAll('.item-row[data-pillar="'+pCode+'"]');
+  const iIdx=existingItems.length;
+  const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
+  const compThs=Array.from(hdrRow.querySelectorAll('.comp-th'));
+
+  const tr=makeItemRow(pIdx,spIdx,pCode,iIdx,'','','');
+  tr.classList.add('open');
+
+  // Add budget inputs for each existing component
+  const spacer=tr.querySelector('.add-spacer');
+  compThs.forEach(th=>{
+    const cid=th.dataset.cid;
+    const td=document.createElement('td');
+    td.dataset.cid=cid;
+    td.innerHTML=`<input type="number" class="inp r i-budget" placeholder="0" min="0" style="width:90px" oninput="csp(${pIdx},${spIdx})">`;
+    tr.insertBefore(td,spacer);
+  });
+
+  body.insertBefore(tr,addRow);
+  csp(pIdx,spIdx);
 }
 
-function switchCompTab(pIdx,spIdx,cIdx){
-  document.getElementById('ctabs-'+pIdx+'-'+spIdx).querySelectorAll('.gdc-ctab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('cpanels-'+pIdx+'-'+spIdx).querySelectorAll('.gdc-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('ctab-'+pIdx+'-'+spIdx+'-'+cIdx)?.classList.add('active');
-  document.getElementById('cpanel-'+pIdx+'-'+spIdx+'-'+cIdx)?.classList.add('active');
+// ─── Common Cost items ───
+function toggleCC(pIdx,spIdx){
+  const body=document.getElementById('cc-body-'+pIdx+'-'+spIdx);
+  const chev=document.getElementById('cc-chev-'+pIdx+'-'+spIdx);
+  if(!body)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'';
+  if(chev)chev.textContent=open?'▶':'▼';
 }
 
-// ──────────── GDC per component ────────────
-function buildPillarHTML(pIdx,spIdx,cIdx){
-  return PILLARS.map(p=>{
-    const rows=p.items.map(([code,no,desc])=>iRowStr(pIdx,spIdx,cIdx,p.code,p.prefix,code,no,desc)).join('');
-    return `<div class="pill-card">
-      <div class="pill-hdr" onclick="togglePill('${pIdx}-${spIdx}-${cIdx}-${p.code}')">
-        <h4><span class="ptag">${p.code}</span>${p.name}</h4>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="pill-sub" id="ps-${pIdx}-${spIdx}-${cIdx}-${p.code}">—</span>
-          <button class="tog" id="tog-${pIdx}-${spIdx}-${cIdx}-${p.code}">▾</button>
-        </div>
-      </div>
-      <div id="pb-${pIdx}-${spIdx}-${cIdx}-${p.code}">
-        <table class="dt"><thead><tr>
-          <th style="min-width:100px">Code</th><th style="width:46px">No.</th><th>Description</th>
-          <th class="r" style="min-width:120px">Budget (RM)</th>
-          <th class="r" style="min-width:80px">PSF (RM)</th>
-          <th class="r" style="min-width:80px">% of GDV</th>
-          <th style="width:26px"></th>
-        </tr></thead>
-        <tbody class="items-tbody">${rows}</tbody></table>
-        <button class="add-btn" onclick="addItem(${pIdx},${spIdx},${cIdx},'${p.code}','${p.prefix}')">+ Add Item</button>
-      </div>
-    </div>`;
-  }).join('');
+function addCCItem(pIdx,spIdx,pillar='',code='',desc='',amt=''){
+  const tbody=document.getElementById('cc-rows-'+pIdx+'-'+spIdx);if(!tbody)return;
+  const tr=document.createElement('tr');
+  const opts=PILLARS.map(p=>`<option value="${p.code}"${p.code===pillar?' selected':''}>${p.code} — ${p.name}</option>`).join('');
+  tr.innerHTML=`
+    <td><select class="inp cc-pillar" onchange="csp(${pIdx},${spIdx})">${opts}</select></td>
+    <td><input type="text" class="inp cc-code" value="${code}" placeholder="e.g. L.HOLD" style="width:80px" oninput="csp(${pIdx},${spIdx})"></td>
+    <td><input type="text" class="inp cc-desc" value="${desc}" placeholder="Description" style="width:100%" oninput="csp(${pIdx},${spIdx})"></td>
+    <td><input type="number" class="inp r cc-amt" value="${amt||''}" placeholder="0" min="0" oninput="csp(${pIdx},${spIdx})"></td>
+    <td><button class="rm-btn" onclick="removeCCItem(this,${pIdx},${spIdx})" title="Remove">✕</button></td>`;
+  tbody.appendChild(tr);
+  // Auto-open if closed
+  const body=document.getElementById('cc-body-'+pIdx+'-'+spIdx);
+  const chev=document.getElementById('cc-chev-'+pIdx+'-'+spIdx);
+  if(body&&body.style.display==='none'){body.style.display='';if(chev)chev.textContent='▼';}
+  csp(pIdx,spIdx);
 }
 
-function iRowStr(pIdx,spIdx,cIdx,pCode,prefix,code='',no='',desc=''){
-  return `<tr class="i-row">
-    <td><input type="text" class="inp mono i-code" value="${code}" placeholder="${prefix}.XXXXX" oninput="csp(${pIdx},${spIdx})"></td>
-    <td><input type="text" class="inp i-no" value="${no}" style="width:40px" oninput="csp(${pIdx},${spIdx})"></td>
-    <td><input type="text" class="inp i-desc" value="${desc}" placeholder="Description" style="min-width:200px" oninput="csp(${pIdx},${spIdx})"></td>
-    <td><input type="number" class="inp r i-budget" placeholder="0" min="0" style="width:110px" oninput="csp(${pIdx},${spIdx})"></td>
-    <td class="r num cpd i-psf">—</td><td class="r num cpd i-pct">—</td>
-    <td><button class="rm-btn" onclick="rmRow(this,${pIdx},${spIdx})">✕</button></td>
-  </tr>`;
+function removeCCItem(btn,pIdx,spIdx){
+  btn.closest('tr').remove();
+  csp(pIdx,spIdx);
 }
 
-function addItem(pIdx,spIdx,cIdx,pCode,prefix){
-  const el=document.querySelector('#pb-'+pIdx+'-'+spIdx+'-'+cIdx+'-'+pCode+' .items-tbody');
-  if(el){el.insertAdjacentHTML('beforeend',iRowStr(pIdx,spIdx,cIdx,pCode,prefix));csp(pIdx,spIdx);}
-}
-
-function rmRow(btn,pIdx,spIdx){btn.closest('tr').remove();csp(pIdx,spIdx);}
-
-function togglePill(id){
-  const el=document.getElementById('pb-'+id),btn=document.getElementById('tog-'+id);
-  const v=el.style.display!=='none';el.style.display=v?'none':'';btn?.classList.toggle('coll',v);
-}
-
-// ──────────── Compute sub-phase ────────────
+// ─── Compute sub-phase ───
 function csp(pIdx,spIdx){
   const sp=document.getElementById('sp-'+pIdx+'-'+spIdx);if(!sp)return;
   const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
   const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
   const compThs=Array.from(hdrRow.querySelectorAll('.comp-th'));
 
-  let totalUnits=0,totalNFA=0,totalGDV=0,totalGDC=0;
+  // Common cost total & NFA for allocation
+  let ccTotal=0;
+  document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' .cc-amt').forEach(inp=>ccTotal+=+inp.value||0);
+  const ccSumEl=document.getElementById('cc-sum-'+pIdx+'-'+spIdx);
+  if(ccSumEl)ccSumEl.textContent=ccTotal>0?fmt(ccTotal):'RM 0';
 
+  // First pass: collect NFA per component
+  const compNFA={};let totalNFA=0;
   compThs.forEach(th=>{
     const cid=th.dataset.cid;
     const getTd=row=>row.querySelector('td[data-cid="'+cid+'"]');
     const u=+(getTd(body.querySelector('[data-a="units"]'))?.querySelector('.c-units')?.value)||0;
     const n=+(getTd(body.querySelector('[data-a="nfa_u"]'))?.querySelector('.c-nfa')?.value)||0;
+    compNFA[cid]=u*n;totalNFA+=u*n;
+  });
+
+  let totalGGDV=0,totalBumiAmt=0,totalSubsidy=0,totalCarpark=0,totalNGDV=0;
+  let totalGDC=0,totalUnits=0;
+
+  compThs.forEach(th=>{
+    const cid=th.dataset.cid;
+    const getTd=row=>row.querySelector('td[data-cid="'+cid+'"]');
+    const setTd=(attr,cls,val)=>{const td=getTd(body.querySelector('[data-a="'+attr+'"]'));if(td){td.className=cls+' num';td.textContent=val;}};
+
+    const u=+(getTd(body.querySelector('[data-a="units"]'))?.querySelector('.c-units')?.value)||0;
+    const n=+(getTd(body.querySelector('[data-a="nfa_u"]'))?.querySelector('.c-nfa')?.value)||0;
     const a=+(getTd(body.querySelector('[data-a="asp"]'))?.querySelector('.c-asp')?.value)||0;
-    const tnfa=u*n, compGDV=tnfa*a;
-    totalUnits+=u; totalNFA+=tnfa; totalGDV+=compGDV;
+    const bumiPct=(+(getTd(body.querySelector('[data-a="bumi_pct"]'))?.querySelector('.c-bumi')?.value)||0)/100;
+    const subsidy=+(getTd(body.querySelector('[data-a="subsidy"]'))?.querySelector('.c-subsidy')?.value)||0;
+    const carpark=+(getTd(body.querySelector('[data-a="carpark"]'))?.querySelector('.c-carpark')?.value)||0;
 
-    // Update GDV computed cells in matrix
-    const set=(attr,v)=>{const td=getTd(body.querySelector('[data-a="'+attr+'"]'));if(td){td.className='cpd num';td.textContent=v;}};
-    set('tnfa',tnfa>0?tnfa.toLocaleString():'—');
-    set('gdv',compGDV>0?fmt(compGDV):'—');
+    const tnfa=u*n;
+    const ggdv=tnfa*a;
+    const bumiAmt=ggdv*bumiPct;
+    const ngdv=ggdv-bumiAmt-subsidy+carpark;
 
-    // Per-component GDC from its panel
-    const panel=document.getElementById('cpanel-'+pIdx+'-'+spIdx+'-'+cid);
-    let compGDCTotal=0;
-    if(panel){
-      PILLARS.forEach(p=>{
-        const pbEl=document.getElementById('pb-'+pIdx+'-'+spIdx+'-'+cid+'-'+p.code);
-        if(!pbEl)return;
-        let sub=0;
-        pbEl.querySelectorAll('.i-row').forEach(row=>{
-          const b=+row.querySelector('.i-budget')?.value||0;sub+=b;
-          row.querySelector('.i-psf').textContent=fmtPsf(b,tnfa);
-          row.querySelector('.i-pct').textContent=fmtPct(b,compGDV);
-        });
-        compGDCTotal+=sub;
-        document.getElementById('ps-'+pIdx+'-'+spIdx+'-'+cid+'-'+p.code).textContent=sub>0?fmt(sub):'—';
+    // CC allocation per pillar for this component
+    const ccByPillar={};
+    document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' tr').forEach(row=>{
+      const pl=row.querySelector('.cc-pillar')?.value||'';
+      const amt=+row.querySelector('.cc-amt')?.value||0;
+      const alloc=totalNFA>0?amt*(tnfa/totalNFA):0;
+      ccByPillar[pl]=(ccByPillar[pl]||0)+alloc;
+    });
+
+    setTd('tnfa','cpd',tnfa>0?tnfa.toLocaleString():'—');
+    setTd('ggdv','cpd',ggdv>0?fmt(ggdv):'—');
+    setTd('bumi_amt','cpd',bumiAmt>0?'('+fmt(bumiAmt)+')':'—');
+    setTd('ngdv','cpd',fmt(ngdv));
+
+    // GDC = pillar explicit items + CC allocated to that pillar
+    let compGDC=0;
+    PILLARS.forEach(p=>{
+      let pSub=(ccByPillar[p.code]||0);
+      body.querySelectorAll('.item-row[data-pillar="'+p.code+'"]').forEach(row=>{
+        const bTd=row.querySelector('td[data-cid="'+cid+'"] .i-budget');
+        pSub+=+(bTd?.value)||0;
       });
-    }
-    totalGDC+=compGDCTotal;
-    const compPBT=compGDV-compGDCTotal, compMg=compGDV>0?compPBT/compGDV:0;
-    set('gdc',compGDCTotal>0?fmt(compGDCTotal):'—');
-    set('pbt',compPBT!==0?fmt(compPBT):'—');
-    set('margin',compGDV>0?(compMg*100).toFixed(1)+'%':'—');
+      compGDC+=pSub;
+    });
+
+    // GDC / PBT / Margin per component
+    const pbt=ngdv-compGDC;
+    const mg=ngdv>0?pbt/ngdv:0;
+    const gdcTd=getTd(body.querySelector('[data-a="gdc_total"]'));
+    if(gdcTd){gdcTd.className='gdc-cell num';gdcTd.textContent=compGDC>0?fmt(compGDC):'—';}
+    const pbtTd=getTd(body.querySelector('[data-a="pbt"]'));
+    if(pbtTd){pbtTd.className='pbt-cell num';pbtTd.textContent=fmt(pbt);}
+    const mgTd=getTd(body.querySelector('[data-a="margin"]'));
+    if(mgTd){mgTd.className='mg-cell num';mgTd.textContent=ngdv>0?(mg*100).toFixed(1)+'%':'—';}
+
+    totalUnits+=u;totalNGDV+=ngdv;totalGGDV+=ggdv;
+    totalBumiAmt+=bumiAmt;totalSubsidy+=subsidy;totalCarpark+=carpark;totalGDC+=compGDC;
+  });
+
+  // Pillar subtotals per component (explicit items + CC allocated to this pillar)
+  PILLARS.forEach(p=>{
+    const pRow=document.getElementById('prow-'+pIdx+'-'+spIdx+'-'+p.code);
+    let grandSub=0;
+    compThs.forEach(th=>{
+      const cid=th.dataset.cid;
+      const tnfa=compNFA[cid]||0;
+      let pSub=0;
+      document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' tr').forEach(row=>{
+        if((row.querySelector('.cc-pillar')?.value||'')===p.code)
+          pSub+=totalNFA>0?(+row.querySelector('.cc-amt')?.value||0)*(tnfa/totalNFA):0;
+      });
+      body.querySelectorAll('.item-row[data-pillar="'+p.code+'"]').forEach(row=>{
+        pSub+=+(row.querySelector('td[data-cid="'+cid+'"] .i-budget')?.value)||0;
+      });
+      const existTd=pRow.querySelector('td[data-cid="'+cid+'"]');
+      if(existTd){existTd.textContent=pSub>0?fmt(pSub):'—';}
+      else{
+        // insert pillar subtotal TDs if missing
+        const addTh=document.getElementById('mtx-add-th-'+pIdx+'-'+spIdx);
+        const addSpacerInRow=pRow.querySelector('.add-spacer');
+        if(addSpacerInRow){
+          const td=document.createElement('td');
+          td.dataset.cid=cid;td.className='num';
+          td.textContent=pSub>0?fmt(pSub):'—';
+          pRow.insertBefore(td,addSpacerInRow);
+        }
+      }
+      grandSub+=pSub;
+    });
+    // Pillar total col
+    const tds=pRow.querySelectorAll('td');const last=tds[tds.length-1];
+    if(last&&last.classList.contains('tcpd'))last.textContent=grandSub>0?fmt(grandSub):'—';
+  });
+
+  // Item row totals
+  body.querySelectorAll('.item-row').forEach(row=>{
+    let rowTotal=0;
+    compThs.forEach(th=>{
+      rowTotal+=+(row.querySelector('td[data-cid="'+th.dataset.cid+'"] .i-budget')?.value)||0;
+    });
+    const iTotalTd=row.querySelector('.i-total');
+    if(iTotalTd)iTotalTd.textContent=rowTotal>0?fmt(rowTotal):'—';
   });
 
   // TOTAL column
   const lastTd=row=>{const tds=row.querySelectorAll('td');return tds[tds.length-1];};
-  const pbt_=totalGDV-totalGDC, mg_=totalGDV>0?pbt_/totalGDV:0;
-  body.querySelectorAll('tr').forEach(row=>{
-    const a=row.getAttribute('data-a'),td=lastTd(row);if(!td)return;
-    if(a==='units') td.textContent=totalUnits>0?totalUnits.toLocaleString():'—';
-    else if(a==='tnfa') td.textContent=totalNFA>0?totalNFA.toLocaleString():'—';
-    else if(a==='asp') td.textContent=totalNFA>0?(totalGDV/totalNFA).toFixed(1)+' (wtd)':'—';
-    else if(a==='gdv') td.textContent=totalGDV>0?fmt(totalGDV):'—';
-    else if(a==='gdc') td.textContent=totalGDC>0?fmt(totalGDC):'—';
-    else if(a==='pbt') td.textContent=pbt_!==0?fmt(pbt_):'—';
-    else if(a==='margin') td.textContent=totalGDV>0?(mg_*100).toFixed(1)+'%':'—';
-  });
-
-  // Deductions
-  const bumiPct=(+sp.querySelector('.bumi-pct')?.value||0)/100;
-  const bumiAmt=totalGDV*bumiPct;
-  const subsidy=+sp.querySelector('.subsidy-amt')?.value||0;
-  const carpark=+sp.querySelector('.cpark-amt')?.value||0;
-  const netGDV=totalGDV-bumiAmt-subsidy+carpark;
-  const q=(cls,v)=>{const el=sp.querySelector('.'+cls);if(el)el.textContent=v;};
-  q('ggdv-val',fmtAmt(totalGDV));q('ggdv-psf',fmtPsf(totalGDV,totalNFA));
-  q('bumi-val',bumiAmt>0?'('+fmt(bumiAmt)+')':'—');q('bumi-psf',bumiAmt>0?fmtPsf(bumiAmt,totalNFA):'—');
-  q('sub-val',subsidy>0?'('+fmt(subsidy)+')':'—');q('sub-psf',subsidy>0?fmtPsf(subsidy,totalNFA):'—');
-  q('cpark-val',carpark>0?fmt(carpark):'—');q('cpark-psf',carpark>0?fmtPsf(carpark,totalNFA):'—');
-  q('ngdv-val',fmtAmt(netGDV));q('ngdv-psf',fmtPsf(netGDV,totalNFA));
-
-  // Profit summary (sub-phase uses total GDV vs total GDC)
-  const pbt=netGDV-totalGDC,margin=netGDV>0?pbt/netGDV:0;
-  q('psum-gdv',fmtAmt(netGDV));q('psum-gdv-psf',fmtPsf(netGDV,totalNFA));
-  q('psum-gdc',fmtAmt(totalGDC));q('psum-gdc-psf',fmtPsf(totalGDC,totalNFA));
-  q('psum-gdc-pct',fmtPct(totalGDC,netGDV));
-  q('psum-pbt',fmtAmt(pbt));q('psum-pbt-psf',fmtPsf(pbt,totalNFA));
-  q('psum-pbt-pct',netGDV>0?(margin*100).toFixed(2)+'%':'—');
+  const setLast=(attr,cls,val)=>{
+    const row=body.querySelector('[data-a="'+attr+'"]');if(!row)return;
+    const td=lastTd(row);if(td){td.className=cls+' num';td.textContent=val;}
+  };
+  setLast('units','tcpd',totalUnits>0?totalUnits.toLocaleString():'—');
+  setLast('tnfa','tcpd',totalNFA>0?totalNFA.toLocaleString():'—');
+  setLast('asp','tcpd',totalNFA>0?(totalGGDV/totalNFA).toFixed(1)+' (wtd)':'—');
+  setLast('ggdv','tcpd',totalGGDV>0?fmt(totalGGDV):'—');
+  setLast('bumi_amt','tcpd',totalBumiAmt>0?'('+fmt(totalBumiAmt)+')':'—');
+  setLast('subsidy','tcpd',totalSubsidy>0?'('+fmt(totalSubsidy)+')':'—');
+  setLast('carpark','tcpd',totalCarpark>0?fmt(totalCarpark):'—');
+  setLast('ngdv','tcpd',fmt(totalNGDV));
+  const totalPBT=totalNGDV-totalGDC,totalMg=totalNGDV>0?totalPBT/totalNGDV:0;
+  setLast('gdc_total','gdc-total',totalGDC>0?fmt(totalGDC):'—');
+  setLast('pbt','pbt-total',fmt(totalPBT));
+  setLast('margin','mg-total',totalNGDV>0?(totalMg*100).toFixed(1)+'%':'—');
 
   const kpiEl=document.querySelector('.sp-kpi-'+pIdx+'-'+spIdx);
-  if(kpiEl)kpiEl.textContent=netGDV>0?fmtM(netGDV):'—';
+  if(kpiEl)kpiEl.textContent=totalNGDV>0?fmtM(totalNGDV):'—';
 
   if(!computedSP[pIdx])computedSP[pIdx]={};
-  computedSP[pIdx][spIdx]={netGDV,totalGDC,pbt,margin,totalNFA};
+  computedSP[pIdx][spIdx]={netGDV:totalNGDV,totalGDC,pbt:totalPBT,margin:totalMg,totalNFA};
   cp(pIdx);
 }
 
-// ──────────── Compute phase ────────────
+// ─── Compute phase ───
 function cp(pIdx){
   const pc=document.getElementById('pc-'+pIdx);if(!pc)return;
   let tG=0,tC=0,tN=0;
@@ -550,7 +733,7 @@ function cp(pIdx){
   if(currentTab==='total')renderTotal();
 }
 
-// ──────────── Total tab ────────────
+// ─── Total tab ───
 function renderTotal(){
   const el=document.getElementById('pc-total');if(!el)return;
   let tG=0,tC=0,tN=0,rows='';
@@ -573,42 +756,67 @@ function renderTotal(){
     </div>
     <div class="sp-card" style="overflow:hidden">
       <div class="sp-hdr"><div class="sp-hdr-l"><span class="sp-badge" style="background:#0F3460;color:#fff">PROJECT</span><span style="font-weight:600;color:#0F3460;font-size:13px">Phase Breakdown</span></div></div>
-      <table class="dt"><thead><tr style="background:#0F3460">
-        <th style="color:#fff">Phase (L3)</th><th class="r" style="color:#fff">Net GDV (RM)</th>
-        <th class="r" style="color:#fff">GDC (RM)</th><th class="r" style="color:#fff">PBT (RM)</th>
-        <th class="r" style="color:#fff">Margin</th><th class="r" style="color:#fff">GDV PSF</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr class="tr-total"><td>Total</td><td class="r num">${fmt(tG)}</td><td class="r num">${fmt(tC)}</td>
-        <td class="r num">${fmt(tP)}</td><td class="r">${tG>0?(tM*100).toFixed(1)+'%':'—'}</td>
-        <td class="r num">${fmtPsf(tG,tN)}</td></tr></tfoot>
-      </table></div>
-    <div class="sp-card" style="overflow:hidden;margin-top:12px">
-      <div class="sp-hdr"><div class="sp-hdr-l"><span style="font-weight:600;color:#0F3460;font-size:13px">Profit Summary</span></div></div>
-      <table class="dt"><thead><tr><th>Line</th><th class="r">Amount (RM)</th><th class="r">PSF (RM)</th><th class="r">% of GDV</th></tr></thead>
-      <tbody>
-        <tr><td>Net GDV</td><td class="r num">${fmt(tG)}</td><td class="r num">${fmtPsf(tG,tN)}</td><td class="r">100.00%</td></tr>
-        <tr class="tr-ded"><td>Less: GDC</td><td class="r num">${fmt(tC)}</td><td class="r num">${fmtPsf(tC,tN)}</td><td class="r">${fmtPct(tC,tG)}</td></tr>
-        <tr class="tr-total"><td>Profit (PBT)</td><td class="r num">${fmt(tP)}</td><td class="r num">${fmtPsf(tP,tN)}</td><td class="r">${tG>0?(tM*100).toFixed(2)+'%':'—'}</td></tr>
-      </tbody></table></div>`;
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:#0F3460">
+          <th style="color:#fff;padding:7px 10px;text-align:left">Phase (L3)</th>
+          <th style="color:#fff;padding:7px 10px;text-align:right">Net GDV (RM)</th>
+          <th style="color:#fff;padding:7px 10px;text-align:right">GDC (RM)</th>
+          <th style="color:#fff;padding:7px 10px;text-align:right">PBT (RM)</th>
+          <th style="color:#fff;padding:7px 10px;text-align:right">Margin</th>
+          <th style="color:#fff;padding:7px 10px;text-align:right">GDV PSF</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr style="background:#E8F0FE;font-weight:700">
+          <td style="padding:7px 10px;color:#0F3460">Total</td>
+          <td style="padding:7px 10px;text-align:right">${fmt(tG)}</td>
+          <td style="padding:7px 10px;text-align:right">${fmt(tC)}</td>
+          <td style="padding:7px 10px;text-align:right">${fmt(tP)}</td>
+          <td style="padding:7px 10px;text-align:right">${tG>0?(tM*100).toFixed(1)+'%':'—'}</td>
+          <td style="padding:7px 10px;text-align:right">${fmtPsf(tG,tN)}</td>
+        </tr></tfoot>
+      </table>
+    </div>`;
 }
 
-// ──────────── Toggles ────────────
+// ─── Toggles ───
 function toggleMeta(){
   const b=document.getElementById('meta-body'),a=document.getElementById('ma');
   const v=b.style.display!=='none';b.style.display=v?'none':'';a.textContent=v?'▶':'▼';
 }
 
-// ──────────── Read helpers ────────────
-function readMeta(){return{co:document.getElementById('m-co').value,plot:document.getElementById('m-plot').value,loc:document.getElementById('m-loc').value,code:document.getElementById('m-code').value||'NCT-001',name:document.getElementById('m-name').value||'Untitled',ver:document.getElementById('m-ver').value||'V01',scen:document.getElementById('m-scen').value,stat:document.getElementById('m-stat').value,date:document.getElementById('m-date').value,wacc:document.getElementById('m-wacc').value};}
+// ─── Read helpers ───
+function readMeta(){
+  return{
+    co:document.getElementById('m-co').value,
+    plot:document.getElementById('m-plot').value,
+    loc:document.getElementById('m-loc').value,
+    code:document.getElementById('m-code').value||'NCT-001',
+    name:document.getElementById('m-name').value||'Untitled',
+    stage:document.getElementById('m-stage').value,
+    scen:document.getElementById('m-scen').value,
+    stat:document.getElementById('m-stat').value,
+    date:document.getElementById('m-date').value,
+    wacc:document.getElementById('m-wacc').value,
+  };
+}
 
 function readSPData(pIdx,spIdx){
   const sp=document.getElementById('sp-'+pIdx+'-'+spIdx);if(!sp)return null;
   const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
   const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
   const spName=sp.querySelector('.sp-name')?.value||'Sub-phase '+(spIdx+1);
+  let ccAmt=0;const ccItems=[];
+  document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' tr').forEach(row=>{
+    const pillar=row.querySelector('.cc-pillar')?.value||'';
+    const code=row.querySelector('.cc-code')?.value||'';
+    const desc=row.querySelector('.cc-desc')?.value||'';
+    const amt=+row.querySelector('.cc-amt')?.value||0;
+    ccAmt+=amt;ccItems.push({pillar,code,desc,amt});
+  });
+
+  const compThs=Array.from(hdrRow.querySelectorAll('.comp-th'));
   const components=[];
-  hdrRow.querySelectorAll('.comp-th').forEach(th=>{
+  compThs.forEach(th=>{
     const cid=th.dataset.cid;
     const getTd=row=>row.querySelector('td[data-cid="'+cid+'"]');
     const name=th.querySelector('.c-name')?.value||'';
@@ -616,122 +824,416 @@ function readSPData(pIdx,spIdx){
     const units=+(getTd(body.querySelector('[data-a="units"]'))?.querySelector('.c-units')?.value)||0;
     const nfa=+(getTd(body.querySelector('[data-a="nfa_u"]'))?.querySelector('.c-nfa')?.value)||0;
     const asp=+(getTd(body.querySelector('[data-a="asp"]'))?.querySelector('.c-asp')?.value)||0;
-    const items={};
+    const bumiPct=+(getTd(body.querySelector('[data-a="bumi_pct"]'))?.querySelector('.c-bumi')?.value)||0;
+    const subsidy=+(getTd(body.querySelector('[data-a="subsidy"]'))?.querySelector('.c-subsidy')?.value)||0;
+    const carpark=+(getTd(body.querySelector('[data-a="carpark"]'))?.querySelector('.c-carpark')?.value)||0;
+    const costItems=[];
     PILLARS.forEach(p=>{
-      items[p.code]=[];
-      const pbEl=document.getElementById('pb-'+pIdx+'-'+spIdx+'-'+cid+'-'+p.code);
-      if(pbEl)pbEl.querySelectorAll('.i-row').forEach(row=>{
-        items[p.code].push({code:row.querySelector('.i-code')?.value,no:row.querySelector('.i-no')?.value,desc:row.querySelector('.i-desc')?.value,budget:+row.querySelector('.i-budget')?.value||0});
+      body.querySelectorAll('.item-row[data-pillar="'+p.code+'"]').forEach(row=>{
+        const budget=+(row.querySelector('td[data-cid="'+cid+'"] .i-budget')?.value)||0;
+        const code=row.querySelector('.i-code')?.value||'';
+        const desc=row.querySelector('.i-desc')?.value||'';
+        costItems.push({pillar:p.code,code,desc,budget});
       });
     });
-    components.push({cid,name,type,units,nfa,asp,items});
+    components.push({cid,name,type,units,nfa,asp,bumiPct,subsidy,carpark,costItems});
   });
-  return{spName,components,bumiPct:+sp.querySelector('.bumi-pct')?.value||0,subsidy:+sp.querySelector('.subsidy-amt')?.value||0,carpark:+sp.querySelector('.cpark-amt')?.value||0,...(computedSP[pIdx]?.[spIdx]||{})};
+  return{spName,ccAmt,ccItems,components};
 }
 
-// ──────────── Export Report ────────────
+// ─── Export Report ───
 function downloadReport(){
-  if(!window.XLSX){alert('SheetJS not loaded — requires internet.');return;}
+  if(!window.XLSX){alert('SheetJS not loaded.');return;}
   const meta=readMeta();const wb=XLSX.utils.book_new();
-  const pN={P1:'Land Cost',P2:'Construction Cost',P3:'Infrastructure',P4:'Professional Fees',P5:'Finance, Sales & Marketing'};
+  const n=v=>typeof v==='number'?Math.round(v):v;
+  const pct=v=>v?+(v).toFixed(1)+'%':'—';
 
   phases.forEach((ph,pIdx)=>{
     const rows=[];
-    rows.push([meta.name+' — '+ph.name]);
-    rows.push(['L1: '+meta.co+'  |  L2: '+meta.plot+'  |  Version: '+meta.ver+'  |  Scenario: '+meta.scen]);
-    rows.push([]);
+    // Project header
+    rows.push([meta.name+' ('+meta.code+')'],[meta.stage+' — '+meta.scen+'  |  '+meta.date],[meta.co+'  ·  '+meta.plot+'  ·  '+meta.loc],[]);
+
     for(let s=0;s<spCount[pIdx];s++){
       const sp=readSPData(pIdx,s);if(!sp)continue;
-      rows.push([sp.spName+' (L4)']);
-      rows.push(['Component','Type','Units','NFA/Unit (sqft)','ASP (RM psf)','Gross GDV (RM)','Total GDC (RM)','PBT (RM)']);
-      let spGDV=0,spGDC=0;
-      sp.components.forEach(c=>{
-        const gDV=c.units*c.nfa*c.asp;
-        let cGDC=0;PILLARS.forEach(p=>c.items[p.code]?.forEach(i=>cGDC+=i.budget));
-        spGDV+=gDV;spGDC+=cGDC;
-        rows.push([c.name,c.type,c.units,c.nfa,c.asp,gDV,cGDC,gDV-cGDC]);
-      });
-      rows.push([]);
-      rows.push(['Gross GDV','','','','',spGDV]);
-      if(sp.bumiPct)rows.push(['Less: Bumi ('+sp.bumiPct+'%)','','','','',-spGDV*sp.bumiPct/100]);
-      if(sp.subsidy)rows.push(['Less: Cross-Subsidy','','','','',-sp.subsidy]);
-      if(sp.carpark)rows.push(['Add: Carpark','','','','',sp.carpark]);
-      rows.push(['Net GDV','','','','',sp.netGDV||0]);
-      rows.push([]);
-      // GDC detail per component
-      sp.components.forEach(c=>{
-        const cGDV=c.units*c.nfa*c.asp;
-        rows.push([c.name+' — GDC Detail']);
-        rows.push(['Code','No.','Description','Budget (RM)','PSF','% of GDV']);
-        PILLARS.forEach(p=>{
-          if(!c.items[p.code]?.some(i=>i.budget>0))return;
-          rows.push([p.code+' — '+pN[p.code]]);
-          c.items[p.code].forEach(i=>rows.push([i.code,i.no,i.desc,i.budget,'','']));
+      const C=sp.components;const nc=C.length;
+      const totalNFA=C.reduce((a,c)=>a+c.units*c.nfa,0);
+      const ccByPillar={};
+      (sp.ccItems||[]).forEach(cc=>{ccByPillar[cc.pillar]=(ccByPillar[cc.pillar]||0)+cc.amt;});
+
+      // ── Sub-phase header ──
+      rows.push(['◼ '+sp.spName,...Array(nc+1).fill('')]);
+
+      // ── Common Cost section ──
+      if((sp.ccItems||[]).length){
+        rows.push(['COMMON COST',...Array(nc).fill(''),n(sp.ccAmt)]);
+        rows.push(['Pillar','Code / Description',...C.map(()=>''),'Amount (RM)']);
+        sp.ccItems.forEach(cc=>{
+          rows.push([cc.pillar,cc.code+(cc.desc?' — '+cc.desc:''),...C.map(()=>''),n(cc.amt)]);
         });
-        let cGDC=0;PILLARS.forEach(p=>c.items[p.code]?.forEach(i=>cGDC+=i.budget));
-        rows.push(['Total GDC','','',cGDC]);rows.push(['PBT','','',cGDV-cGDC]);rows.push([]);
-      });
+        rows.push([]);
+      }
+
+      // ── Matrix header ──
+      rows.push(['ATTRIBUTE','NOTE',...C.map(c=>c.name),'TOTAL']);
+      rows.push(['',...['Type',...C.map(c=>c.type),'']]);
+
+      // ── SALES ──
+      rows.push(['▸  SALES',...Array(nc+1).fill('')]);
+      rows.push(['Units','',                ...C.map(c=>c.units),                                      C.reduce((a,c)=>a+c.units,0)]);
+      rows.push(['NFA / Unit','sqft',        ...C.map(c=>c.nfa),                                       '']);
+      rows.push(['Total NFA','sqft',         ...C.map(c=>n(c.units*c.nfa)),                            n(totalNFA)]);
+      rows.push(['ASP','RM psf',             ...C.map(c=>c.asp),                                       totalNFA>0?+(C.reduce((a,c)=>a+c.units*c.nfa*c.asp,0)/totalNFA).toFixed(1)+' (wtd)':'—']);
+      const ggdvs=C.map(c=>c.units*c.nfa*c.asp);
+      const totGGDV=ggdvs.reduce((a,v)=>a+v,0);
+      rows.push(['Gross GDV','RM',           ...ggdvs.map(n),                                          n(totGGDV)]);
+      rows.push(['Bumi Discount','%',         ...C.map(c=>c.bumiPct+'%'),                              '']);
+      const bumiAmts=C.map((c,i)=>ggdvs[i]*c.bumiPct/100);
+      const totBumi=bumiAmts.reduce((a,v)=>a+v,0);
+      rows.push(['Bumi Amt','RM',            ...bumiAmts.map(v=>v?'('+n(v)+')':'—'),                  totBumi?'('+n(totBumi)+')':'—']);
+      const subsidies=C.map(c=>c.subsidy);
+      const totSub=subsidies.reduce((a,v)=>a+v,0);
+      rows.push(['Cross-subsidy','RM',       ...subsidies.map(v=>v?'('+n(v)+')':'—'),                 totSub?'('+n(totSub)+')':'—']);
+      const carparks=C.map(c=>c.carpark);
+      const totCar=carparks.reduce((a,v)=>a+v,0);
+      rows.push(['Carpark Revenue','RM',     ...carparks.map(v=>v||'—'),                               totCar||'—']);
+      const ngdvs=C.map((c,i)=>ggdvs[i]-bumiAmts[i]-subsidies[i]+carparks[i]);
+      const totNGDV=ngdvs.reduce((a,v)=>a+v,0);
+      rows.push(['NET GDV','RM',             ...ngdvs.map(n),                                          n(totNGDV)]);
       rows.push([]);
+
+      // ── COST ──
+      rows.push(['▸  COST',...Array(nc+1).fill('')]);
+      const compGDC=C.map(()=>0);
+
+      PILLARS.forEach(p=>{
+        // CC allocation for this pillar per component
+        const ccP=ccByPillar[p.code]||0;
+        const ccAllocs=C.map(c=>totalNFA>0?ccP*(c.units*c.nfa/totalNFA):0);
+
+        // Explicit items — same rows shared across components
+        // Use first component's items as the template (codes/descs are shared)
+        const pillarItemsRef=C[0]?.costItems.filter(i=>i.pillar===p.code)||[];
+
+        // Pillar subtotals per component
+        const pillarSubs=C.map((c,ci)=>{
+          const expl=c.costItems.filter(i=>i.pillar===p.code).reduce((a,i)=>a+i.budget,0);
+          return expl+ccAllocs[ci];
+        });
+        const totPillar=pillarSubs.reduce((a,v)=>a+v,0);
+        pillarSubs.forEach((v,i)=>compGDC[i]+=v);
+
+        rows.push([p.code+' — '+p.name,'',...pillarSubs.map(v=>v?n(v):'—'),totPillar?n(totPillar):'—']);
+
+        // CC items for this pillar
+        (sp.ccItems||[]).filter(cc=>cc.pillar===p.code).forEach(cc=>{
+          rows.push(['  [CC] '+cc.code,cc.desc,...ccAllocs.map(v=>v?n(v):'—'),n(cc.amt)]);
+        });
+
+        // Explicit line items
+        pillarItemsRef.forEach((item,idx)=>{
+          const budgets=C.map(c=>c.costItems.filter(i=>i.pillar===p.code)[idx]?.budget||'');
+          const rowTotal=budgets.reduce((a,v)=>a+(+v||0),0);
+          rows.push(['  '+item.code,item.desc,...budgets.map(v=>v||'—'),rowTotal?n(rowTotal):'—']);
+        });
+      });
+
+      rows.push([]);
+      const totGDC=compGDC.reduce((a,v)=>a+v,0);
+      rows.push(['TOTAL GDC','RM',...compGDC.map(n),n(totGDC)]);
+      const pbts=ngdvs.map((v,i)=>v-compGDC[i]);
+      const totPBT=totNGDV-totGDC;
+      rows.push(['PBT','RM',...pbts.map(n),n(totPBT)]);
+      rows.push(['Margin','%',...ngdvs.map((v,i)=>pct(v>0?pbts[i]/v*100:null)),pct(totNGDV>0?totPBT/totNGDV*100:null)]);
+      rows.push([],[]);
     }
+
+    const maxNC=Math.max(1,...Array.from({length:spCount[pIdx]},(_,s)=>{const d=readSPData(pIdx,s);return d?d.components.length:0;}));
     const ws=XLSX.utils.aoa_to_sheet(rows);
-    ws['!cols']=[{wch:28},{wch:14},{wch:32},{wch:16},{wch:12},{wch:14},{wch:14},{wch:14}];
+    ws['!cols']=[{wch:28},{wch:24},...Array(maxNC).fill({wch:18}),{wch:18}];
     XLSX.utils.book_append_sheet(wb,ws,ph.name.substring(0,31));
   });
 
-  const sr=[[meta.name],[meta.ver+' | '+meta.scen],[]];
-  sr.push(['Phase','Net GDV','GDC','PBT','Margin (%)']);
-  phases.forEach((p,i)=>{const d=computedP[i]||{};sr.push([p.name,d.netGDV||0,d.totalGDC||0,d.pbt||0,d.netGDV>0?+((d.margin||0)*100).toFixed(1):'']);});
-  const sw=XLSX.utils.aoa_to_sheet(sr);sw['!cols']=[{wch:22},{wch:16},{wch:16},{wch:16},{wch:12}];
+  // Summary sheet
+  const sr=[[meta.name+' ('+meta.code+')'],[meta.stage+' | '+meta.scen],[]];
+  sr.push(['Phase','Net GDV (RM)','Total GDC (RM)','PBT (RM)','Margin (%)']);
+  phases.forEach((p,i)=>{
+    const d=computedP[i]||{};
+    sr.push([p.name,n(d.netGDV||0),n(d.totalGDC||0),n(d.pbt||0),d.netGDV>0?+((d.margin||0)*100).toFixed(1):'']);
+  });
+  const sw=XLSX.utils.aoa_to_sheet(sr);
+  sw['!cols']=[{wch:24},{wch:18},{wch:18},{wch:18},{wch:12}];
   XLSX.utils.book_append_sheet(wb,sw,'Summary');
-  XLSX.writeFile(wb,(meta.code||'NCT')+'_'+meta.ver+'_Report.xlsx');
+  XLSX.writeFile(wb,(meta.code||'NCT')+'_'+meta.stage+'_Report.xlsx');
 }
 
-// ──────────── Export Pipeline ────────────
+// ─── Export Pipeline ───
 function downloadPipeline(){
-  if(!window.XLSX){alert('SheetJS not loaded — requires internet.');return;}
+  if(!window.XLSX){alert('SheetJS not loaded.');return;}
   const meta=readMeta();const wb=XLSX.utils.book_new();
-  const pLbl={P1:'LAND',P2:'CONSTRUCTION',P3:'INFRASTRUCTURE',P4:'PROFESSIONAL',P5:'FINANCE_MKT'};
-
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
-    ['l1_company','l2_plot_code','l2_location','project_code','project_name','version_code','scenario_code','status','version_date','wacc','currency'],
-    [meta.co,meta.plot,meta.loc,meta.code,meta.name,meta.ver,meta.scen,meta.stat,meta.date,meta.wacc,'MYR'],
+    ['l1_company','l2_plot_code','l2_location','project_code','project_name','stage','scenario_code','status','version_date','wacc','currency'],
+    [meta.co,meta.plot,meta.loc,meta.code,meta.name,meta.stage,meta.scen,meta.stat,meta.date,meta.wacc,'MYR'],
   ]),'tbl_META');
-
-  const phRows=[['l3_phase_code','l3_phase_name','project_code','version_code']];
-  phases.forEach((p,i)=>phRows.push(['P'+(i+1),p.name,meta.code,meta.ver]));
+  const phRows=[['l3_phase_code','l3_phase_name','project_code','stage']];
+  phases.forEach((p,i)=>phRows.push(['P'+(i+1),p.name,meta.code,meta.stage]));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(phRows),'tbl_PHASE');
-
-  const salesRows=[['l3_phase_code','l4_subphase','l5_component','component_type','units','nfa_per_unit_sqft','asp_psf','gross_gdv','bumi_pct','subsidy_amt','carpark_amt','version_code']];
-  const costRows=[['l3_phase_code','l4_subphase','l5_component','code','report_no','description','pillar','budget','version_code']];
-
+  const salesRows=[['l3_phase_code','l4_subphase','l5_component','product_type','units','nfa_per_unit','asp_psf','bumi_pct','cross_subsidy_amt','carpark_revenue','gross_gdv','net_gdv','stage']];
+  const costRows=[['l3_phase_code','l4_subphase','l5_component','pillar_code','item_code','description','budget_amt','stage']];
   phases.forEach((ph,pIdx)=>{
     for(let s=0;s<spCount[pIdx];s++){
       const sp=readSPData(pIdx,s);if(!sp)continue;
       const pc='P'+(pIdx+1);
+      const totalNFA=sp.components.reduce((s,c)=>s+c.units*c.nfa,0);
       sp.components.forEach(c=>{
-        salesRows.push([pc,sp.spName,c.name,c.type,c.units,c.nfa,c.asp,c.units*c.nfa*c.asp,sp.bumiPct,sp.subsidy,sp.carpark,meta.ver]);
-        PILLARS.forEach(p=>(c.items[p.code]||[]).forEach(i=>i.budget>0&&costRows.push([pc,sp.spName,c.name,i.code,i.no,i.desc,pLbl[p.code],i.budget,meta.ver])));
+        const ggdv=c.units*c.nfa*c.asp;
+        const ngdv=ggdv-ggdv*c.bumiPct/100-c.subsidy+c.carpark;
+        salesRows.push([pc,sp.spName,c.name,c.type,c.units,c.nfa,c.asp,c.bumiPct,c.subsidy,c.carpark,ggdv,ngdv,meta.stage]);
+        // Common cost as COMMON pillar row
+        const compNFA2=c.units*c.nfa;
+        (sp.ccItems||[]).forEach(cc=>{
+          const alloc=totalNFA>0?cc.amt*(compNFA2/totalNFA):0;
+          if(alloc>0)costRows.push([pc,sp.spName,c.name,cc.pillar||'COMMON',cc.code,cc.desc+' (alloc)',alloc,meta.stage]);
+        });
+        c.costItems.forEach(i=>{if(i.budget>0)costRows.push([pc,sp.spName,c.name,i.pillar,i.code,i.desc,i.budget,meta.stage]);});
       });
+      // Hierarchy row
     }
   });
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(salesRows),'tbl_SALES');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(costRows),'tbl_COST');
+  XLSX.writeFile(wb,(meta.code||'NCT')+'_'+meta.stage+'_Pipeline.xlsx');
+}
 
-  const curveRows=[['l3_phase_code','l4_subphase','l5_component','curve_type','Y0','Y1','Y2','Y3','Y4','version_code']];
+// ─── Supabase ───
+const SB_URL='https://vtqjcfiobexntgjyiteu.supabase.co';
+const SB_KEY='sb_publishable_v9e4RtC6Z2ZWh0Cvk2BECA_DRpX5aKq';
+
+function sbFetch(path,method='GET',body=null,prefer=''){
+  const h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+  if(prefer)h['Prefer']=prefer;
+  return fetch(SB_URL+path,{method,headers:h,body:body?JSON.stringify(body):null});
+}
+
+function buildSavePayload(){
+  const meta=readMeta();
+  const hierarchyRows=[],salesRows=[],costRows=[];
   phases.forEach((ph,pIdx)=>{
-    for(let s=0;s<spCount[pIdx];s++){
-      const sp=readSPData(pIdx,s);if(!sp)continue;
-      sp.components.forEach(c=>{
-        curveRows.push(['P'+(pIdx+1),sp.spName,c.name,'spend',0.10,0.30,0.35,0.20,0.05,meta.ver]);
-        curveRows.push(['P'+(pIdx+1),sp.spName,c.name,'collection',0.03,0.20,0.35,0.30,0.12,meta.ver]);
+    for(let spIdx=0;spIdx<spCount[pIdx];spIdx++){
+      const sp=readSPData(pIdx,spIdx);if(!sp)continue;
+      hierarchyRows.push({
+        l1_company:meta.co,l2_plot_code:meta.plot,l2_plot_name:meta.loc,
+        l3_phase:ph.name,l4_subphase:sp.spName,
+        l3_sort_order:pIdx,l4_sort_order:spIdx,
+      });
+      (sp.ccItems||[]).forEach((item,iSort)=>{
+        if(item.amt>0||item.code)costRows.push({
+          l3_phase:ph.name,l4_subphase:sp.spName,l5_component:'',
+          pillar_code:item.pillar||'COMMON',item_code:item.code||'',
+          description:item.desc||'',budget_amt:item.amt||0,sort_order:iSort,
+        });
+      });
+      sp.components.forEach((c,cSort)=>{
+        salesRows.push({
+          l3_phase:ph.name,l4_subphase:sp.spName,l5_component:c.name,
+          product_type:c.type,units:c.units,nfa_per_unit:c.nfa,asp_psf:c.asp,
+          bumi_pct:c.bumiPct,cross_subsidy_amt:c.subsidy,carpark_revenue:c.carpark,
+          sort_order:cSort,
+        });
+        c.costItems.forEach((item,iSort)=>{
+          if(item.budget>0||item.code)costRows.push({
+            l3_phase:ph.name,l4_subphase:sp.spName,l5_component:c.name,
+            pillar_code:item.pillar,item_code:item.code||'',
+            description:item.desc||'',budget_amt:item.budget||0,sort_order:iSort,
+          });
+        });
       });
     }
   });
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(curveRows),'tbl_CURVE');
-  XLSX.writeFile(wb,(meta.code||'NCT')+'_'+meta.ver+'_Pipeline.xlsx');
+  return{
+    snapshot:{
+      project_name:meta.name||'Untitled',project_code:meta.code,stage:meta.stage,
+      scenario:meta.scen,status:meta.stat,version_date:meta.date||null,
+      wacc:parseFloat(meta.wacc)||null,
+    },
+    hierarchyRows,salesRows,costRows,
+  };
 }
 
-// ──────────── Init ────────────
+async function saveSnapshot(){
+  const saveBtns=document.querySelectorAll('.btn.ghost');
+  const saveBtn=[...saveBtns].find(b=>b.textContent.includes('Save'));
+  const orig=saveBtn?.textContent;
+  if(saveBtn)saveBtn.textContent='Saving…';
+  try{
+    const p=buildSavePayload();
+    const sRes=await sbFetch('/rest/v1/snapshots','POST',p.snapshot,'return=representation');
+    if(!sRes.ok)throw new Error(await sRes.text());
+    const [snap]=await sRes.json();
+    const sid=snap.id;
+    const tag=rows=>rows.map(r=>({...r,snapshot_id:sid}));
+    const results=await Promise.all([
+      p.hierarchyRows.length?sbFetch('/rest/v1/hierarchy','POST',tag(p.hierarchyRows)):Promise.resolve(),
+      p.salesRows.length?sbFetch('/rest/v1/sales','POST',tag(p.salesRows)):Promise.resolve(),
+      p.costRows.length?sbFetch('/rest/v1/cost','POST',tag(p.costRows)):Promise.resolve(),
+    ]);
+    for(const r of results){if(r&&!r.ok)throw new Error(await r.text());}
+    if(saveBtn)saveBtn.textContent='✓ Saved';
+    setTimeout(()=>{if(saveBtn)saveBtn.textContent=orig;},2000);
+  }catch(e){
+    alert('Save failed: '+e.message);
+    if(saveBtn)saveBtn.textContent=orig;
+  }
+}
+
+async function openLoad(){
+  const list=document.getElementById('modal-list');
+  list.innerHTML='<div class="modal-empty">Loading…</div>';
+  document.getElementById('load-modal').classList.add('open');
+  try{
+    const res=await sbFetch('/rest/v1/snapshots?select=id,project_name,stage,version_date&order=created_at.desc');
+    if(!res.ok)throw new Error(await res.text());
+    const snaps=await res.json();
+    if(!snaps.length){list.innerHTML='<div class="modal-empty">No saved feasibilities yet.</div>';return;}
+    list.innerHTML=snaps.map(s=>`
+      <div class="modal-row" onclick="loadSnapshot('${s.id}')">
+        <span class="modal-name">${s.project_name||'Untitled'}</span>
+        <span class="modal-stage">${s.stage||'BD'}</span>
+        <span class="modal-date">${s.version_date||'—'}</span>
+      </div>`).join('');
+  }catch(e){list.innerHTML='<div class="modal-empty">Error: '+e.message+'</div>';}
+}
+
+function closeLoad(){document.getElementById('load-modal').classList.remove('open');}
+
+async function loadSnapshot(id){
+  closeLoad();
+  if(!confirm('Load this feasibility? Current data will be replaced.'))return;
+  try{
+    const [snapRes,hierRes,salesRes,costRes]=await Promise.all([
+      sbFetch('/rest/v1/snapshots?id=eq.'+id+'&select=*'),
+      sbFetch('/rest/v1/hierarchy?snapshot_id=eq.'+id+'&order=l3_sort_order,l4_sort_order'),
+      sbFetch('/rest/v1/sales?snapshot_id=eq.'+id+'&order=sort_order'),
+      sbFetch('/rest/v1/cost?snapshot_id=eq.'+id+'&order=sort_order'),
+    ]);
+    const [snap]=await snapRes.json();
+    const [hierarchy,sales,costs]=await Promise.all([hierRes.json(),salesRes.json(),costRes.json()]);
+    restoreFromSupabase(snap,hierarchy,sales,costs);
+  }catch(e){alert('Load failed: '+e.message);}
+}
+
+function resetDOM(){
+  phases=[];spCount={};compCount={};computedSP={};computedP={};
+  document.getElementById('phase-tabs').innerHTML='';
+  document.getElementById('phase-contents').innerHTML='';
+  const d=document.createElement('div');
+  d.id='pc-total';d.className='pc';d.style.padding='20px';
+  d.innerHTML='<p style="color:#aaa;padding:40px;text-align:center">Add phases and enter data to see the consolidated total.</p>';
+  document.getElementById('phase-contents').appendChild(d);
+}
+
+function clearPillarItems(pIdx,spIdx,pCode){
+  document.getElementById('mtx-body-'+pIdx+'-'+spIdx)
+    ?.querySelectorAll('.item-row[data-pillar="'+pCode+'"]').forEach(r=>r.remove());
+}
+
+function restoreFromSupabase(snap,hierarchy,sales,costs){
+  // Meta
+  document.getElementById('m-co').value=hierarchy[0]?.l1_company||'';
+  document.getElementById('m-plot').value=hierarchy[0]?.l2_plot_code||'';
+  document.getElementById('m-loc').value=hierarchy[0]?.l2_plot_name||'';
+  document.getElementById('m-code').value=snap.project_code||'';
+  document.getElementById('m-name').value=snap.project_name||'';
+  document.getElementById('m-stage').value=snap.stage||'BD';
+  document.getElementById('m-scen').value=snap.scenario||'Base';
+  document.getElementById('m-stat').value=snap.status||'Draft';
+  document.getElementById('m-date').value=snap.version_date||'';
+  document.getElementById('m-wacc').value=snap.wacc||'8.0';
+  resetDOM();
+
+  // Distinct phases in order
+  const phaseNames=[...new Map(hierarchy.map(r=>[r.l3_phase,r.l3_sort_order])).entries()]
+    .sort((a,b)=>a[1]-b[1]).map(([n])=>n);
+
+  phaseNames.forEach(phaseName=>{
+    addPhase(phaseName);
+    const pIdx=phases.length-1;
+    document.getElementById('sp-list-'+pIdx).innerHTML='';
+    spCount[pIdx]=0;
+
+    hierarchy.filter(r=>r.l3_phase===phaseName).forEach(spRow=>{
+      const spName=spRow.l4_subphase;
+      addSubphase(pIdx,spName);
+      const spIdx=spCount[pIdx]-1;
+      const spEl=document.getElementById('sp-'+pIdx+'-'+spIdx);
+      const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
+      const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
+
+      // Common cost items (l5_component = '')
+      const ccRows=costs.filter(c=>c.l3_phase===phaseName&&c.l4_subphase===spName&&c.l5_component==='');
+      if(ccRows.length){
+        const ccBody=document.getElementById('cc-body-'+pIdx+'-'+spIdx);
+        const ccChev=document.getElementById('cc-chev-'+pIdx+'-'+spIdx);
+        if(ccBody){ccBody.style.display='';if(ccChev)ccChev.textContent='▼';}
+        ccRows.forEach(r=>addCCItem(pIdx,spIdx,r.pillar_code,r.item_code,r.description,r.budget_amt));
+      }
+
+      // Remove default component from addSubphase
+      hdrRow.querySelectorAll('.comp-th').forEach(th=>{
+        const cid=th.dataset.cid;th.remove();
+        body.querySelectorAll('td[data-cid="'+cid+'"]').forEach(td=>td.remove());
+      });
+      compCount[pIdx][spIdx]=0;
+
+      // Add components from sales table
+      const comps=sales.filter(s=>s.l3_phase===phaseName&&s.l4_subphase===spName);
+      comps.forEach(comp=>{
+        addComponent(pIdx,spIdx);
+        const cIdx=compCount[pIdx][spIdx]-1;
+        hdrRow.querySelector('.comp-th[data-cid="'+cIdx+'"]')?.querySelector('.c-name')&&
+          (hdrRow.querySelector('.comp-th[data-cid="'+cIdx+'"]').querySelector('.c-name').value=comp.l5_component||'');
+        const getTd=a=>{const r=body.querySelector('[data-a="'+a+'"]');return r?r.querySelector('td[data-cid="'+cIdx+'"]'):null;};
+        const si=(a,sel,v)=>{const td=getTd(a);if(td){const el=td.querySelector(sel);if(el&&v!=null)el.value=v;}};
+        si('type','.c-type',comp.product_type);
+        si('units','.c-units',comp.units);
+        si('nfa_u','.c-nfa',comp.nfa_per_unit);
+        si('asp','.c-asp',comp.asp_psf);
+        si('bumi_pct','.c-bumi',comp.bumi_pct);
+        si('subsidy','.c-subsidy',comp.cross_subsidy_amt);
+        si('carpark','.c-carpark',comp.carpark_revenue);
+      });
+
+      // Restore pillar items (shared rows across all components)
+      PILLARS.forEach(p=>{
+        clearPillarItems(pIdx,spIdx,p.code);
+        const pillarCosts=costs.filter(c=>c.l3_phase===phaseName&&c.l4_subphase===spName&&c.l5_component!==''&&c.pillar_code===p.code);
+        // Unique items ordered by sort_order
+        const seen=new Set();const uniqueItems=[];
+        [...pillarCosts].sort((a,b)=>a.sort_order-b.sort_order).forEach(c=>{
+          const key=(c.item_code||'')+'||'+(c.description||'');
+          if(!seen.has(key)){seen.add(key);uniqueItems.push({code:c.item_code||'',desc:c.description||''});}
+        });
+        uniqueItems.forEach(item=>{
+          addPillarItem(pIdx,spIdx,p.code,p.prefix);
+          const rows=body.querySelectorAll('.item-row[data-pillar="'+p.code+'"]');
+          const row=rows[rows.length-1];if(!row)return;
+          const ci=row.querySelector('.i-code');if(ci)ci.value=item.code;
+          const di=row.querySelector('.i-desc');if(di)di.value=item.desc;
+          comps.forEach((comp,cIdx)=>{
+            const match=pillarCosts.find(c=>c.l5_component===comp.l5_component&&c.item_code===item.code);
+            const bi=row.querySelector('td[data-cid="'+cIdx+'"] .i-budget');
+            if(bi&&match)bi.value=match.budget_amt||0;
+          });
+        });
+      });
+
+      csp(pIdx,spIdx);
+    });
+    switchTab(pIdx);
+  });
+  updateBreadcrumb();
+}
+
+// ─── Init ───
 const totalDiv=document.createElement('div');
 totalDiv.id='pc-total';totalDiv.className='pc';totalDiv.style.padding='20px';
 totalDiv.innerHTML='<p style="color:#aaa;padding:40px;text-align:center">Add phases and enter data to see the consolidated total.</p>';
