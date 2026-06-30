@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NCT Feasibility Tool — User Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fc;color:#1a1a2e;font-size:14px;line-height:1.65}
+a{color:#0F3460;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Nav */
+.topnav{background:#0F3460;color:#fff;padding:0 32px;display:flex;align-items:center;gap:24px;height:52px;position:sticky;top:0;z-index:50}
+.topnav .brand{font-size:15px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.topnav .spacer{flex:1}
+.topnav a{color:rgba(255,255,255,.75);font-size:12px;font-weight:500}
+.topnav a:hover{color:#fff;text-decoration:none}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none}
+.back-btn:hover{background:rgba(255,255,255,.25);text-decoration:none}
+
+/* Layout */
+.page{max-width:880px;margin:0 auto;padding:40px 24px 80px}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,#0F3460 0%,#1a4a80 100%);color:#fff;border-radius:12px;padding:40px 44px;margin-bottom:40px}
+.hero h1{font-size:26px;font-weight:700;margin-bottom:8px}
+.hero p{font-size:14px;color:rgba(255,255,255,.8);max-width:560px;line-height:1.7}
+.hero .chips{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;letter-spacing:.3px}
+
+/* Sections */
+h2{font-size:18px;font-weight:700;color:#0F3460;margin:40px 0 6px;padding-bottom:8px;border-bottom:2px solid #E8F0FE}
+h3{font-size:14px;font-weight:700;color:#1a1a2e;margin:20px 0 6px}
+h4{font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.6px;margin:16px 0 6px}
+p{margin-bottom:10px;color:#333}
+
+/* Quick start cards */
+.qs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.qs-card{background:#fff;border-radius:10px;padding:20px;border:1.5px solid #E8F0FE;position:relative}
+.qs-num{width:28px;height:28px;background:#0F3460;color:#fff;border-radius:50%;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.qs-card h3{margin-top:0;font-size:13px}
+.qs-card p{font-size:12px;color:#666;margin:0}
+
+/* Feature cards */
+.feat{background:#fff;border-radius:10px;border:1px solid #e8eaf0;padding:20px 24px;margin-bottom:16px}
+.feat-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.feat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.feat-icon.blue{background:#E8F0FE}
+.feat-icon.green{background:#d1fae5}
+.feat-icon.amber{background:#fef3c7}
+.feat-icon.red{background:#fee2e2}
+.feat-icon.purple{background:#ede9fe}
+.feat h3{margin:0;font-size:14px}
+.feat p{margin-bottom:6px;font-size:13px;color:#444}
+.feat ul{margin:0 0 0 18px;color:#444;font-size:13px}
+.feat ul li{margin-bottom:3px}
+
+/* Inline code */
+code{background:#f0f2f5;border:1px solid #e0e2e8;border-radius:4px;padding:1px 6px;font-family:'SF Mono',Consolas,monospace;font-size:12px;color:#0F3460}
+
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+th{background:#f0f4fa;text-align:left;padding:8px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#666;border-bottom:2px solid #dee2ea}
+td{padding:8px 12px;border-bottom:1px solid #f0f2f5;vertical-align:top}
+tr:last-child td{border-bottom:none}
+td:first-child{font-weight:600;color:#0F3460;white-space:nowrap}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.3px}
+.tag.bd{background:#fef3c7;color:#92400e}
+.tag.r1{background:#dbeafe;color:#1e40af}
+.tag.r2{background:#e0e7ff;color:#3730a3}
+.tag.r3{background:#d1fae5;color:#065f46}
+
+/* SVG diagrams */
+.diagram{background:#fff;border:1px solid #e8eaf0;border-radius:10px;padding:20px;margin:16px 0;overflow-x:auto}
+.diagram svg{display:block;margin:0 auto}
+
+/* Note / tip boxes */
+.note{background:#fffbeb;border-left:3px solid #f59e0b;border-radius:0 6px 6px 0;padding:10px 14px;margin:12px 0;font-size:12px;color:#78350f}
+.tip{background:#eff6ff;border-left:3px solid #3b82f6;border-radius:0 6px 6px 0;padding:10px 14px;margin:12px 0;font-size:12px;color:#1e3a8a}
+
+/* Button guide */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.btn-demo{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;border:none;cursor:default}
+.btn-ghost{background:#0F3460;color:#fff}
+.btn-red{background:#E94560;color:#fff}
+.btn-grn{background:#10B981;color:#fff}
+
+/* Footer */
+.footer{margin-top:60px;padding-top:24px;border-top:1px solid #e0e2e8;font-size:11px;color:#aaa;text-align:center}
+
+@media(max-width:600px){
+  .qs-grid{grid-template-columns:1fr}
+  .hero{padding:28px 24px}
+  .page{padding:24px 16px 60px}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <span class="brand">NCT Feasibility · User Guide</span>
+  <span class="spacer"></span>
+  <a href="#quick-start">Quick Start</a>
+  <a href="#features">Features</a>
+  <a href="#hierarchy">Data Structure</a>
+  <a href="#export">Export</a>
+  <a href="NCT_Feasi_Input.html" class="back-btn">← Open Tool</a>
+</nav>
+
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>NCT Feasibility Input Tool</h1>
+    <p>A browser-based tool for entering and versioning property development feasibility data — GDV, cost breakdowns, and key returns — across multiple phases, sub-phases, and product components.</p>
+    <div class="chips">
+      <span class="chip">No installation</span>
+      <span class="chip">Cloud save via Supabase</span>
+      <span class="chip">Excel export</span>
+      <span class="chip">Multi-phase · Multi-component</span>
+    </div>
+  </div>
+
+  <!-- Quick Start -->
+  <h2 id="quick-start">Quick Start</h2>
+  <div class="qs-grid">
+    <div class="qs-card">
+      <div class="qs-num">1</div>
+      <h3>Fill Project Details</h3>
+      <p>Click <strong>▶ Project Details</strong> to expand the header. Enter company, plot, project name, and select a stage (BD → R1 → R2 → R3).</p>
+    </div>
+    <div class="qs-card">
+      <div class="qs-num">2</div>
+      <h3>Enter Data in the Matrix</h3>
+      <p>Add components (columns) and fill in units, NFA, ASP, and cost items. Numbers compute live as you type.</p>
+    </div>
+    <div class="qs-card">
+      <div class="qs-num">3</div>
+      <h3>Save &amp; Export</h3>
+      <p>Click <strong>Save</strong> to store a versioned snapshot to the cloud. Click <strong>Report</strong> to download the Excel matrix.</p>
+    </div>
+  </div>
+
+  <!-- Data Structure -->
+  <h2 id="hierarchy">Data Hierarchy (L1 – L5)</h2>
+  <p>The tool organises data in a five-level hierarchy. Each level narrows the scope from company down to individual product type.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 820 200" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:820px">
+      <!-- Nodes -->
+      <!-- L1 -->
+      <rect x="10" y="80" width="120" height="44" rx="8" fill="#0F3460"/>
+      <text x="70" y="97" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="sans-serif">L1</text>
+      <text x="70" y="112" text-anchor="middle" fill="rgba(255,255,255,.85)" font-size="10" font-family="sans-serif">Company</text>
+      <!-- Arrow -->
+      <path d="M130 102 L158 102" stroke="#bbb" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+      <!-- L2 -->
+      <rect x="158" y="80" width="120" height="44" rx="8" fill="#164f8a"/>
+      <text x="218" y="97" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="sans-serif">L2</text>
+      <text x="218" y="112" text-anchor="middle" fill="rgba(255,255,255,.85)" font-size="10" font-family="sans-serif">Plot / Land</text>
+      <!-- Arrow -->
+      <path d="M278 102 L306 102" stroke="#bbb" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+      <!-- L3 -->
+      <rect x="306" y="80" width="120" height="44" rx="8" fill="#1a6ab5"/>
+      <text x="366" y="97" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="sans-serif">L3</text>
+      <text x="366" y="112" text-anchor="middle" fill="rgba(255,255,255,.85)" font-size="10" font-family="sans-serif">Phase</text>
+      <!-- Arrow -->
+      <path d="M426 102 L454 102" stroke="#bbb" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+      <!-- L4 -->
+      <rect x="454" y="80" width="120" height="44" rx="8" fill="#0ea5e9"/>
+      <text x="514" y="97" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="sans-serif">L4</text>
+      <text x="514" y="112" text-anchor="middle" fill="rgba(255,255,255,.85)" font-size="10" font-family="sans-serif">Sub-phase</text>
+      <!-- Arrow -->
+      <path d="M574 102 L602 102" stroke="#bbb" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+      <!-- L5 -->
+      <rect x="602" y="80" width="140" height="44" rx="8" fill="#10B981"/>
+      <text x="672" y="97" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="sans-serif">L5</text>
+      <text x="672" y="112" text-anchor="middle" fill="rgba(255,255,255,.85)" font-size="10" font-family="sans-serif">Component</text>
+      <!-- Labels below -->
+      <text x="70" y="148" text-anchor="middle" fill="#888" font-size="9" font-family="sans-serif">NCT Group</text>
+      <text x="218" y="148" text-anchor="middle" fill="#888" font-size="9" font-family="sans-serif">PLT-07</text>
+      <text x="366" y="148" text-anchor="middle" fill="#888" font-size="9" font-family="sans-serif">Phase 1</text>
+      <text x="514" y="148" text-anchor="middle" fill="#888" font-size="9" font-family="sans-serif">Sub-phase A</text>
+      <text x="672" y="148" text-anchor="middle" fill="#888" font-size="9" font-family="sans-serif">HR1 High-Rise</text>
+      <!-- Labels above -->
+      <text x="70" y="72" text-anchor="middle" fill="#555" font-size="9" font-family="sans-serif">Project header</text>
+      <text x="218" y="72" text-anchor="middle" fill="#555" font-size="9" font-family="sans-serif">Project header</text>
+      <text x="366" y="72" text-anchor="middle" fill="#555" font-size="9" font-family="sans-serif">Phase tab</text>
+      <text x="514" y="72" text-anchor="middle" fill="#555" font-size="9" font-family="sans-serif">Sub-phase card</text>
+      <text x="672" y="72" text-anchor="middle" fill="#555" font-size="9" font-family="sans-serif">Matrix column</text>
+      <!-- Arrow marker -->
+      <defs>
+        <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#bbb"/>
+        </marker>
+      </defs>
+      <!-- Note on L1-L2 -->
+      <text x="144" y="175" text-anchor="middle" fill="#aaa" font-size="8.5" font-family="sans-serif">— entered in Project Details header —</text>
+    </svg>
+  </div>
+
+  <p><strong>L1–L2</strong> are entered once in the Project Details header (company name, plot code, location). <strong>L3</strong> is a phase tab. <strong>L4</strong> is a sub-phase card within a phase. <strong>L5</strong> is a component column in the matrix — each product type (Residential, SOHO, Commercial, Car Park, etc.) is a separate column.</p>
+
+  <!-- Matrix Diagram -->
+  <h2 id="features">The Input Matrix</h2>
+  <p>The main input area is a unified matrix. Each <strong>row</strong> is an attribute; each <strong>column</strong> is a component (L5). A TOTAL column on the right aggregates all components.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 780 340" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:780px;font-family:sans-serif">
+      <!-- Header row -->
+      <rect x="0" y="0" width="780" height="36" fill="#1a1a2e"/>
+      <text x="14" y="23" fill="#fff" font-size="10" font-weight="700">ATTRIBUTE</text>
+      <text x="280" y="23" fill="#aad4f5" font-size="10" font-weight="600">HR1 High-Rise</text>
+      <text x="430" y="23" fill="#aad4f5" font-size="10" font-weight="600">HR2 SOHO</text>
+      <text x="580" y="23" fill="#aad4f5" font-size="10" font-weight="600">CP1 Car Park</text>
+      <text x="710" y="23" fill="#fbbf24" font-size="10" font-weight="700">TOTAL</text>
+
+      <!-- Sales section header -->
+      <rect x="0" y="36" width="780" height="24" fill="#0F3460"/>
+      <text x="14" y="52" fill="#fff" font-size="10" font-weight="700">▸  SALES</text>
+
+      <!-- Sales rows -->
+      <g fill="#f8f9fc" stroke="#e8eaf0" stroke-width="0.5">
+        <rect x="0" y="60" width="780" height="22"/>
+        <rect x="0" y="82" width="780" height="22"/>
+        <rect x="0" y="104" width="780" height="22"/>
+        <rect x="0" y="126" width="780" height="22"/>
+        <rect x="0" y="148" width="780" height="22"/>
+        <rect x="0" y="170" width="780" height="22"/>
+        <rect x="0" y="192" width="780" height="22"/>
+      </g>
+
+      <!-- NET GDV highlight row -->
+      <rect x="0" y="214" width="780" height="24" fill="#e8f5e9"/>
+
+      <!-- Row labels -->
+      <text x="14" y="75" fill="#555" font-size="10">Units</text>
+      <text x="14" y="97" fill="#555" font-size="10">NFA / Unit (sqft)</text>
+      <text x="14" y="119" fill="#555" font-size="10">Total NFA (sqft)</text>
+      <text x="14" y="141" fill="#555" font-size="10">ASP (RM psf)</text>
+      <text x="14" y="163" fill="#555" font-size="10">Gross GDV (RM)</text>
+      <text x="14" y="185" fill="#555" font-size="10">Bumi Discount / Cross-subsidy / Carpark</text>
+      <text x="14" y="207" fill="#555" font-size="10">Bumi Amt (RM)</text>
+      <text x="14" y="231" fill="#059669" font-size="10" font-weight="700">Net GDV (RM)</text>
+
+      <!-- Input indicators -->
+      <rect x="265" y="62" width="100" height="16" rx="3" fill="#fff" stroke="#bbb" stroke-width="1"/>
+      <rect x="415" y="62" width="100" height="16" rx="3" fill="#fff" stroke="#bbb" stroke-width="1"/>
+      <rect x="265" y="84" width="100" height="16" rx="3" fill="#fff" stroke="#bbb" stroke-width="1"/>
+      <rect x="415" y="84" width="100" height="16" rx="3" fill="#fff" stroke="#bbb" stroke-width="1"/>
+      <text x="268" y="74" fill="#0F3460" font-size="9">300</text>
+      <text x="418" y="74" fill="#0F3460" font-size="9">150</text>
+      <text x="268" y="95" fill="#0F3460" font-size="9">900 sqft</text>
+      <text x="418" y="95" fill="#0F3460" font-size="9">650 sqft</text>
+
+      <!-- Computed values (darker) -->
+      <text x="268" y="119" fill="#666" font-size="9">270,000</text>
+      <text x="418" y="119" fill="#666" font-size="9">97,500</text>
+      <text x="700" y="119" fill="#555" font-size="9">367,500</text>
+      <text x="700" y="231" fill="#059669" font-size="9" font-weight="700">202.4M</text>
+
+      <!-- Cost section header -->
+      <rect x="0" y="242" width="780" height="24" fill="#2d2d2d"/>
+      <text x="14" y="258" fill="#fff" font-size="10" font-weight="700">▸  COST</text>
+
+      <!-- Cost rows -->
+      <rect x="0" y="266" width="780" height="22" fill="#fff" stroke="#e8eaf0" stroke-width="0.5"/>
+      <rect x="0" y="288" width="780" height="22" fill="#fff" stroke="#e8eaf0" stroke-width="0.5"/>
+      <rect x="0" y="310" width="780" height="22" fill="#fff" stroke="#e8eaf0" stroke-width="0.5"/>
+      <text x="14" y="281" fill="#555" font-size="10">P1 — Land Cost  (▼ expanded: L.PURCHASE, L.STAMP …)</text>
+      <text x="14" y="303" fill="#555" font-size="10">P2 — Construction  (▼ expanded: C.PILE, C.SUPER_CS …)</text>
+      <text x="14" y="325" fill="#555" font-size="10">P3 / P4 / P5  ·  Total GDC  ·  PBT  ·  Margin</text>
+
+      <!-- Column dividers -->
+      <line x1="260" y1="0" x2="260" y2="340" stroke="#dee2ea" stroke-width="1"/>
+      <line x1="410" y1="0" x2="410" y2="340" stroke="#dee2ea" stroke-width="1"/>
+      <line x1="560" y1="0" x2="560" y2="340" stroke="#dee2ea" stroke-width="1"/>
+      <line x1="690" y1="0" x2="690" y2="340" stroke="#fbbf24" stroke-width="1.5"/>
+
+      <!-- Input vs computed legend -->
+      <rect x="640" y="66" width="10" height="10" rx="2" fill="#fff" stroke="#bbb" stroke-width="1"/>
+      <text x="654" y="75" fill="#888" font-size="8.5">Input</text>
+      <rect x="640" y="82" width="10" height="10" rx="2" fill="#f0f4fa"/>
+      <text x="654" y="91" fill="#888" font-size="8.5">Computed</text>
+    </svg>
+  </div>
+
+  <!-- Features -->
+  <h2>Features</h2>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon blue">📋</div>
+      <h3>Project Details Header</h3>
+    </div>
+    <p>Click <strong>▶ Project Details (L1 – L3)</strong> to expand. Fill in once per session:</p>
+    <table>
+      <tr><th>Field</th><th>Description</th></tr>
+      <tr><td>Company (L1)</td><td>Developer entity, e.g. NCT Group</td></tr>
+      <tr><td>Plot Code (L2)</td><td>Land parcel identifier, e.g. PLT-07</td></tr>
+      <tr><td>Location</td><td>Area / address for reference</td></tr>
+      <tr><td>Project Code</td><td>Internal code, e.g. NCT-001 — used in export filenames</td></tr>
+      <tr><td>Project Name</td><td>Full project name</td></tr>
+      <tr><td>Stage</td><td>Revision stage — see below</td></tr>
+      <tr><td>Scenario</td><td>Base / Upside / Downside</td></tr>
+      <tr><td>Status</td><td>Draft / Final / Approved</td></tr>
+      <tr><td>Version Date</td><td>Date this revision was prepared</td></tr>
+      <tr><td>WACC (%)</td><td>Weighted Average Cost of Capital for IRR reference</td></tr>
+    </table>
+
+    <h4>Stage Progression</h4>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+      <span class="tag bd">BD — Business Development</span>
+      <span style="color:#bbb;line-height:26px">→</span>
+      <span class="tag r1">R1 — Revision 1</span>
+      <span style="color:#bbb;line-height:26px">→</span>
+      <span class="tag r2">R2 — Revision 2</span>
+      <span style="color:#bbb;line-height:26px">→</span>
+      <span class="tag r3">R3 — Revision 3</span>
+    </div>
+    <p style="font-size:12px;color:#666">Each Save creates a new snapshot — changing the stage does not overwrite previous saves.</p>
+  </div>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon blue">📑</div>
+      <h3>Phases (L3) — Tabs</h3>
+    </div>
+    <p>Click <strong>+</strong> next to the phase tabs to add a new phase. Each phase has its own KPI bar and sub-phase list. The <strong>∑ Total</strong> tab shows a cross-phase rollup.</p>
+    <div class="tip">You can rename a phase by editing the tab — just click the tab label and type.</div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon blue">🗂</div>
+      <h3>Sub-phases (L4) — Cards</h3>
+    </div>
+    <p>Each phase can contain multiple sub-phases (e.g. Sub-phase A, Sub-phase B). Click <strong>+ Add Sub-phase (L4)</strong> at the bottom of a phase. Each sub-phase card has:</p>
+    <ul>
+      <li>A collapse / expand toggle (▾)</li>
+      <li>A Common Cost section (see below)</li>
+      <li>A component matrix (see below)</li>
+    </ul>
+  </div>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon amber">💰</div>
+      <h3>Common Cost</h3>
+    </div>
+    <p>Costs that belong to a sub-phase as a whole (not tied to one specific component), such as holding cost or project management fees. Click <strong>▶ Common Cost</strong> above the matrix to expand.</p>
+    <p>Each Common Cost item has:</p>
+    <ul>
+      <li><strong>Pillar</strong> — which cost pillar this belongs to (P1–P5), so it rolls up correctly in the matrix</li>
+      <li><strong>Code</strong> — item code, e.g. <code>L.HOLD</code></li>
+      <li><strong>Description</strong> — free text label</li>
+      <li><strong>Amount (RM)</strong> — total sub-phase level cost</li>
+    </ul>
+    <p>The amount is <strong>automatically allocated</strong> to each component column proportionally by NFA and included in that component's pillar total. No manual split needed.</p>
+    <div class="note">Common Cost does <em>not</em> appear as a separate row in the matrix — it is folded into the correct pillar row so GDC totals are always consistent.</div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon blue">📊</div>
+      <h3>Components (L5) — Matrix Columns</h3>
+    </div>
+    <p>Click <strong>+ Add</strong> in the matrix header to add a new component column. Each column has a name tab (editable). Remove a component with the <strong>✕</strong> on its tab.</p>
+    <h4>Sales rows (top of matrix)</h4>
+    <table>
+      <tr><th>Row</th><th>Input / Computed</th><th>Notes</th></tr>
+      <tr><td>Type</td><td>Input (dropdown)</td><td>Residential, SOHO, Commercial, etc.</td></tr>
+      <tr><td>Units</td><td>Input</td><td>Number of units / lots</td></tr>
+      <tr><td>NFA / Unit</td><td>Input (sqft)</td><td>Net floor area per unit</td></tr>
+      <tr><td>Total NFA</td><td>Computed</td><td>Units × NFA/Unit</td></tr>
+      <tr><td>ASP</td><td>Input (RM psf)</td><td>Average selling price per sqft</td></tr>
+      <tr><td>Gross GDV</td><td>Computed</td><td>Total NFA × ASP</td></tr>
+      <tr><td>Bumi Discount</td><td>Input (%)</td><td>Bumi discount percentage</td></tr>
+      <tr><td>Bumi Amt</td><td>Computed</td><td>Gross GDV × Bumi %</td></tr>
+      <tr><td>Cross-subsidy</td><td>Input (RM)</td><td>Affordable housing subsidy amount</td></tr>
+      <tr><td>Carpark Revenue</td><td>Input (RM)</td><td>Carpark proceeds (if separate)</td></tr>
+      <tr><td><strong>Net GDV</strong></td><td><strong>Computed</strong></td><td>Gross GDV − Bumi Amt − Cross-subsidy + Carpark</td></tr>
+    </table>
+
+    <h4>Cost rows (bottom of matrix) — P1 to P5</h4>
+    <table>
+      <tr><th>Pillar</th><th>Covers</th></tr>
+      <tr><td>P1 — Land Cost</td><td>Land purchase, stamp duty, legal fees, conversion premium, holding cost</td></tr>
+      <tr><td>P2 — Construction</td><td>Piling, substructure, superstructure, finishes, M&amp;E, contingency</td></tr>
+      <tr><td>P3 — Infrastructure</td><td>Roads, drainage, TNB, water, sewerage, development contribution</td></tr>
+      <tr><td>P4 — Professional Fees</td><td>Architect, structural, M&amp;E, QS, surveyor, legal</td></tr>
+      <tr><td>P5 — Finance, Sales &amp; Mkt</td><td>IDC, loan fees, sales gallery, marketing, agent commission, PM</td></tr>
+    </table>
+    <p>Click any pillar row (e.g. <strong>▼ P1 — Land Cost</strong>) to expand and see pre-filled line items. Each item has an editable code, description, and a budget input per component column.</p>
+    <p>Click <strong>+ Add item</strong> at the bottom of a pillar to add custom line items beyond the defaults.</p>
+  </div>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon green">💾</div>
+      <h3>Save &amp; Load</h3>
+    </div>
+    <div class="btn-row">
+      <button class="btn-demo btn-ghost">⬆ Load</button>
+      <button class="btn-demo btn-ghost">💾 Save</button>
+    </div>
+    <ul>
+      <li><strong>Save</strong> — writes the entire current state (all phases, sub-phases, components, costs) as a new versioned snapshot to the cloud. Each save is independent — nothing is overwritten.</li>
+      <li><strong>Load</strong> — opens a list of all saved snapshots (project name · stage · date). Click any row to fully restore that snapshot into the tool.</li>
+    </ul>
+    <div class="tip">To create a new revision: Load an existing snapshot → change the Stage → edit numbers → Save. The original snapshot is preserved.</div>
+  </div>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon red">📥</div>
+      <h3>Export — Report</h3>
+    </div>
+    <button class="btn-demo btn-red" style="margin-bottom:10px">⬇ Report</button>
+    <p>Downloads an Excel file (<code>{ProjectCode}_{Stage}_Report.xlsx</code>) with one sheet per phase, laid out as a matrix matching the on-screen layout:</p>
+    <ul>
+      <li>Rows = attributes (Units, NFA, ASP, GDV, cost items …)</li>
+      <li>Columns = components + TOTAL</li>
+      <li>Cost items shown inline under each pillar with per-component breakdown</li>
+      <li>A <strong>Summary</strong> sheet rolls up Net GDV, GDC, PBT, and Margin across all phases</li>
+    </ul>
+  </div>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon purple">📤</div>
+      <h3>Export — Pipeline (Fabric / Power BI)</h3>
+    </div>
+    <button class="btn-demo btn-grn" style="margin-bottom:10px">⬇ Pipeline</button>
+    <p>Downloads a multi-sheet Excel file with flat normalised tables, ready for import into Microsoft Fabric or Power BI:</p>
+    <table>
+      <tr><th>Sheet</th><th>Contents</th></tr>
+      <tr><td><code>tbl_META</code></td><td>Project header — one row</td></tr>
+      <tr><td><code>tbl_PHASE</code></td><td>Phase list with sort order</td></tr>
+      <tr><td><code>tbl_SALES</code></td><td>One row per component — all sales inputs and computed GDV figures</td></tr>
+      <tr><td><code>tbl_COST</code></td><td>One row per cost line item per component, with pillar code and item code</td></tr>
+    </table>
+  </div>
+
+  <!-- Keyboard / tips -->
+  <h2>Tips &amp; Notes</h2>
+
+  <div class="feat">
+    <div class="feat-hdr">
+      <div class="feat-icon amber">💡</div>
+      <h3>General Tips</h3>
+    </div>
+    <ul>
+      <li>All figures compute <strong>live as you type</strong> — no need to press Enter or click Recalculate.</li>
+      <li>The <strong>KPI bar</strong> at the top of each phase (Net GDV, GDC, PBT, Margin) updates instantly.</li>
+      <li>The breadcrumb at the top tracks <strong>L1 → L2 → L3 → L4 → L5</strong> as you fill in names.</li>
+      <li>Pillar rows are <strong>expanded by default</strong>. Click the pillar header to collapse. Default line items are pre-filled — just enter the amounts.</li>
+      <li>Common Cost items are <strong>optional</strong>. If there are no sub-phase-level costs, leave the section collapsed.</li>
+      <li>The <strong>∑ Total</strong> tab aggregates additive figures (GDV, GDC, PBT, units) across all phases. Non-additive ratios (margin, PSF) are recomputed from the totals.</li>
+      <li>Saving requires an internet connection (data is stored in Supabase cloud). The Report and Pipeline exports work fully offline.</li>
+    </ul>
+  </div>
+
+  <div class="foot-links" style="margin-top:32px;display:flex;gap:16px;flex-wrap:wrap">
+    <a href="NCT_Feasi_Input.html" style="font-weight:600">← Open Input Tool</a>
+    <a href="SPEC.md" style="color:#888">Technical Spec (SPEC.md)</a>
+    <a href="FABRIC_MIGRATION.md" style="color:#888">Fabric Migration Guide</a>
+  </div>
+
+  <div class="footer">
+    NCT Feasibility Input Tool · Internal Use Only · <a href="https://github.com/kimhoo-ong/NCT-feasi" style="color:#aaa">GitHub</a>
+  </div>
+
+</div>
+</body>
+</html>
