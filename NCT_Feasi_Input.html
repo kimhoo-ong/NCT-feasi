@@ -1105,7 +1105,12 @@ async function signOut(){
 
 async function getAccessToken(){
   await msalReady();
-  const accs=msalApp.getAllAccounts();
+  let accs=msalApp.getAllAccounts();
+  if(!accs.length){
+    await msalApp.loginPopup({scopes:FABRIC_SCOPES});
+    updateAuthUI();
+    accs=msalApp.getAllAccounts();
+  }
   const req={scopes:FABRIC_SCOPES,account:accs[0]};
   try{const r=await msalApp.acquireTokenSilent(req);return r.accessToken;}
   catch(e){
