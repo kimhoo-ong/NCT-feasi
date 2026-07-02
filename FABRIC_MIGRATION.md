@@ -101,11 +101,11 @@ Run these statements in Fabric Warehouse (Query editor or SSMS connected to the 
 
 CREATE TABLE dbo.snapshots (
     id             UNIQUEIDENTIFIER,
-    project_name   NVARCHAR(255),
-    project_code   NVARCHAR(100),
-    stage          NVARCHAR(10),
-    scenario       NVARCHAR(50),
-    status         NVARCHAR(50),
+    project_name   VARCHAR(255),
+    project_code   VARCHAR(100),
+    stage          VARCHAR(10),
+    scenario       VARCHAR(50),
+    status         VARCHAR(50),
     version_date   DATE,
     wacc           DECIMAL(6,4),
     created_at     DATETIME2
@@ -113,21 +113,21 @@ CREATE TABLE dbo.snapshots (
 
 CREATE TABLE dbo.hierarchy (
     snapshot_id    UNIQUEIDENTIFIER,
-    l1_company     NVARCHAR(255),
-    l2_plot_code   NVARCHAR(100),
-    l2_plot_name   NVARCHAR(255),
-    l3_phase       NVARCHAR(255),
-    l4_subphase    NVARCHAR(255),
+    l1_company     VARCHAR(255),
+    l2_plot_code   VARCHAR(100),
+    l2_plot_name   VARCHAR(255),
+    l3_phase       VARCHAR(255),
+    l4_subphase    VARCHAR(255),
     l3_sort_order  INT,
     l4_sort_order  INT
 );
 
 CREATE TABLE dbo.sales (
     snapshot_id      UNIQUEIDENTIFIER,
-    l3_phase         NVARCHAR(255),
-    l4_subphase      NVARCHAR(255),
-    l5_component     NVARCHAR(255),
-    product_type     NVARCHAR(100),
+    l3_phase         VARCHAR(255),
+    l4_subphase      VARCHAR(255),
+    l5_component     VARCHAR(255),
+    product_type     VARCHAR(100),
     units            INT,
     nfa_per_unit     DECIMAL(12,2),
     asp_psf          DECIMAL(12,2),
@@ -139,12 +139,12 @@ CREATE TABLE dbo.sales (
 
 CREATE TABLE dbo.cost (
     snapshot_id    UNIQUEIDENTIFIER,
-    l3_phase       NVARCHAR(255),
-    l4_subphase    NVARCHAR(255),
-    l5_component   NVARCHAR(255),
-    pillar_code    NVARCHAR(20),
-    item_code      NVARCHAR(100),
-    description    NVARCHAR(500),
+    l3_phase       VARCHAR(255),
+    l4_subphase    VARCHAR(255),
+    l5_component   VARCHAR(255),
+    pillar_code    VARCHAR(20),
+    item_code      VARCHAR(100),
+    description    VARCHAR(500),
     budget_amt     DECIMAL(18,2),
     sort_order     INT
 );
