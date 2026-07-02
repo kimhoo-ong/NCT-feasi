@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>NCT Feasibility — Input Tool</title>
+<script src="https://unpkg.com/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"></script>
 <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -119,6 +120,8 @@ header h1{font-size:15px;font-weight:600}
 .mtx .item-add-row{display:none}
 .mtx .item-add-row.open{display:table-row}
 .mtx .item-add-row td{background:#fafbfc;border-top:1px dashed #ccc}
+.mtx .item-row.cc-row td.attr-col{color:#b45309;font-style:italic}
+.mtx .item-row.cc-row td:not(.attr-col):not(.add-spacer){color:#b45309;font-style:italic;background:#fffdf5}
 
 /* Inputs */
 .inp{padding:4px 7px;border:1.5px solid #ddd;border-radius:4px;font-size:12px;outline:none;background:#fff;color:#1a1a2e;width:100%}
@@ -157,6 +160,8 @@ select.inp{cursor:pointer;padding:3px 5px}
   <h1>NCT Feasibility · Input Tool</h1>
   <div class="hdr-r">
     <a href="GUIDE.html" target="_blank" class="btn ghost" style="text-decoration:none">? Help</a>
+    <span id="user-label" style="font-size:11px;color:rgba(255,255,255,.6);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+    <button id="login-btn" class="btn ghost" onclick="signIn()" style="display:none">🔑 Sign In</button>
     <button class="btn ghost" onclick="openLoad()">⬆ Load</button>
     <button class="btn ghost" onclick="saveSnapshot()">💾 Save</button>
     <button class="btn red" onclick="downloadReport()">⬇ Report</button>
@@ -485,8 +490,9 @@ function addComponent(pIdx,spIdx){
     row.insertBefore(td,spacer);
   });
 
-  // Add budget TDs to all item rows for this component
+  // Add budget TDs to all item rows for this component (CC rows rebuilt by csp)
   body.querySelectorAll('.item-row').forEach(row=>{
+    if(row.classList.contains('cc-row'))return;
     const spacer=row.querySelector('.add-spacer');if(!spacer)return;
     const td=document.createElement('td');
     td.dataset.cid=cIdx;
@@ -566,11 +572,62 @@ function removeCCItem(btn,pIdx,spIdx){
   csp(pIdx,spIdx);
 }
 
+// ─── Rebuild CC display rows in matrix ───
+function rebuildCCMatrixRows(pIdx,spIdx){
+  const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);if(!body)return;
+  body.querySelectorAll('.item-row.cc-row').forEach(r=>r.remove());
+  const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
+  const compThs=Array.from(hdrRow.querySelectorAll('.comp-th'));
+  const compNFA={};let totalNFA=0;
+  compThs.forEach(th=>{
+    const cid=th.dataset.cid;
+    const getTd=row=>row?.querySelector('td[data-cid="'+cid+'"]');
+    const u=+(getTd(body.querySelector('[data-a="units"]'))?.querySelector('.c-units')?.value)||0;
+    const n=+(getTd(body.querySelector('[data-a="nfa_u"]'))?.querySelector('.c-nfa')?.value)||0;
+    compNFA[cid]=u*n;totalNFA+=u*n;
+  });
+  const ccItems=[];
+  document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' tr').forEach(row=>{
+    const pillar=row.querySelector('.cc-pillar')?.value||'';
+    const code=row.querySelector('.cc-code')?.value||'';
+    const desc=row.querySelector('.cc-desc')?.value||'';
+    const amt=+row.querySelector('.cc-amt')?.value||0;
+    if(pillar)ccItems.push({pillar,code,desc,amt});
+  });
+  if(!ccItems.length)return;
+  PILLARS.forEach(p=>{
+    const pillarItems=ccItems.filter(i=>i.pillar===p.code);if(!pillarItems.length)return;
+    const addRow=document.getElementById('iadd-'+pIdx+'-'+spIdx+'-'+p.code);
+    const pRow=document.getElementById('prow-'+pIdx+'-'+spIdx+'-'+p.code);
+    const isOpen=pRow?.dataset.open==='1';
+    pillarItems.forEach(item=>{
+      const tr=document.createElement('tr');
+      tr.className='item-row cc-row'+(isOpen?' open':'');
+      tr.dataset.pillar=p.code;
+      const label=(item.code?item.code+' ':'')+( item.desc||'Common Cost');
+      tr.innerHTML=`<td class="attr-col">↳ ${label}</td><td class="add-spacer"></td><td class="i-total num">—</td>`;
+      const spacer=tr.querySelector('.add-spacer');
+      compThs.forEach(th=>{
+        const cid=th.dataset.cid;
+        const alloc=totalNFA>0?item.amt*((compNFA[cid]||0)/totalNFA):0;
+        const td=document.createElement('td');
+        td.dataset.cid=cid;td.className='num';
+        td.textContent=alloc>0?fmt(alloc):'—';
+        tr.insertBefore(td,spacer);
+      });
+      const totalTd=tr.querySelector('.i-total');
+      if(totalTd)totalTd.textContent=item.amt>0?fmt(item.amt):'—';
+      body.insertBefore(tr,addRow);
+    });
+  });
+}
+
 // ─── Compute sub-phase ───
 function csp(pIdx,spIdx){
   const sp=document.getElementById('sp-'+pIdx+'-'+spIdx);if(!sp)return;
   const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
   const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
+  rebuildCCMatrixRows(pIdx,spIdx);
   const compThs=Array.from(hdrRow.querySelectorAll('.comp-th'));
 
   // Common cost total & NFA for allocation
@@ -1005,14 +1062,65 @@ function downloadPipeline(){
   XLSX.writeFile(wb,(meta.code||'NCT')+'_'+meta.stage+'_Pipeline.xlsx');
 }
 
-// ─── Supabase ───
-const SB_URL='https://vtqjcfiobexntgjyiteu.supabase.co';
-const SB_KEY='sb_publishable_v9e4RtC6Z2ZWh0Cvk2BECA_DRpX5aKq';
+// ─── Fabric / MSAL ───
+const MSAL_CLIENT_ID   = '86f52802-9904-41bb-aa19-355ab415a104';
+const MSAL_TENANT_ID   = '621ff01b-cd58-4fa0-8bec-2b29fe71ec6e';
+const FABRIC_WORKSPACE = '6df5a7e8-4075-4dcb-9c72-02ea29ad61c0';
+const FABRIC_WAREHOUSE = '6d6f60fe-79b1-4f38-9480-526cc357d65e';
+const FABRIC_ENDPOINT  = `https://api.fabric.microsoft.com/v1/workspaces/${FABRIC_WORKSPACE}/warehouses/${FABRIC_WAREHOUSE}/queryexecution`;
+const FABRIC_SCOPES    = ['https://analysis.windows.net/powerbi/api/.default'];
 
-function sbFetch(path,method='GET',body=null,prefer=''){
-  const h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
-  if(prefer)h['Prefer']=prefer;
-  return fetch(SB_URL+path,{method,headers:h,body:body?JSON.stringify(body):null});
+let msalApp=null;
+let _msalReady=null;
+function msalReady(){
+  if(!_msalReady){
+    msalApp=new msal.PublicClientApplication({
+      auth:{clientId:MSAL_CLIENT_ID,authority:`https://login.microsoftonline.com/${MSAL_TENANT_ID}`,redirectUri:window.location.origin+window.location.pathname},
+      cache:{cacheLocation:'sessionStorage'},
+    });
+    _msalReady=msalApp.initialize();
+  }
+  return _msalReady;
+}
+
+async function signIn(){
+  await msalReady();
+  const r=await msalApp.loginPopup({scopes:FABRIC_SCOPES});
+  document.getElementById('user-label').textContent=r.account.username;
+  document.getElementById('login-btn').style.display='none';
+}
+
+async function getAccessToken(){
+  await msalReady();
+  const accs=msalApp.getAllAccounts();
+  const req={scopes:FABRIC_SCOPES,account:accs[0]};
+  try{const r=await msalApp.acquireTokenSilent(req);return r.accessToken;}
+  catch(e){
+    if(e instanceof msal.InteractionRequiredAuthError){const r=await msalApp.acquireTokenPopup(req);return r.accessToken;}
+    throw e;
+  }
+}
+
+function esc(v){return String(v??'').replace(/'/g,"''");}
+function sqlVal(v){return v==null||v===''?'NULL':`'${esc(v)}'`;}
+function sqlNum(v){const n=parseFloat(v);return isNaN(n)?'NULL':n;}
+
+async function fabricFetch(sql){
+  const token=await getAccessToken();
+  const res=await fetch(FABRIC_ENDPOINT,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({statements:[{statement:sql}]}),
+  });
+  if(!res.ok){const t=await res.text();throw new Error(`Fabric ${res.status}: ${t}`);}
+  const json=await res.json();
+  const result=json?.results?.[0];
+  if(!result)return[];
+  // Normalise column list (API shape may vary in preview)
+  const cols=(result.schema?.columns||result.columns||[]).map(c=>c.name||c);
+  const rows=result.data||result.rows||[];
+  if(!cols.length)return[];
+  return rows.map(row=>{const o={};cols.forEach((c,i)=>{o[c]=row[i];});return o;});
 }
 
 function buildSavePayload(){
@@ -1061,29 +1169,32 @@ function buildSavePayload(){
 }
 
 async function saveSnapshot(){
-  const saveBtns=document.querySelectorAll('.btn.ghost');
-  const saveBtn=[...saveBtns].find(b=>b.textContent.includes('Save'));
+  const saveBtn=[...document.querySelectorAll('.btn.ghost')].find(b=>b.textContent.includes('Save'));
   const orig=saveBtn?.textContent;
   if(saveBtn)saveBtn.textContent='Saving…';
   try{
-    const p=buildSavePayload();
-    const sRes=await sbFetch('/rest/v1/snapshots','POST',p.snapshot,'return=representation');
-    if(!sRes.ok)throw new Error(await sRes.text());
-    const [snap]=await sRes.json();
-    const sid=snap.id;
-    const tag=rows=>rows.map(r=>({...r,snapshot_id:sid}));
-    const results=await Promise.all([
-      p.hierarchyRows.length?sbFetch('/rest/v1/hierarchy','POST',tag(p.hierarchyRows)):Promise.resolve(),
-      p.salesRows.length?sbFetch('/rest/v1/sales','POST',tag(p.salesRows)):Promise.resolve(),
-      p.costRows.length?sbFetch('/rest/v1/cost','POST',tag(p.costRows)):Promise.resolve(),
-    ]);
-    for(const r of results){if(r&&!r.ok)throw new Error(await r.text());}
+    const p=buildSavePayload();const s=p.snapshot;
+    const sid=crypto.randomUUID();
+    // 1 — snapshot
+    await fabricFetch(`INSERT INTO dbo.snapshots(id,project_name,project_code,stage,scenario,status,version_date,wacc)VALUES(${sqlVal(sid)},${sqlVal(s.project_name)},${sqlVal(s.project_code)},${sqlVal(s.stage)},${sqlVal(s.scenario)},${sqlVal(s.status)},${sqlVal(s.version_date)},${sqlNum(s.wacc)})`);
+    // 2 — hierarchy
+    if(p.hierarchyRows.length){
+      const v=p.hierarchyRows.map(r=>`(${sqlVal(sid)},${sqlVal(r.l1_company)},${sqlVal(r.l2_plot_code)},${sqlVal(r.l2_plot_name)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${r.l3_sort_order},${r.l4_sort_order})`).join(',');
+      await fabricFetch(`INSERT INTO dbo.hierarchy(snapshot_id,l1_company,l2_plot_code,l2_plot_name,l3_phase,l4_subphase,l3_sort_order,l4_sort_order)VALUES${v}`);
+    }
+    // 3 — sales
+    if(p.salesRows.length){
+      const v=p.salesRows.map((r,i)=>`(${sqlVal(sid)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${sqlVal(r.l5_component)},${sqlVal(r.product_type)},${sqlNum(r.units)},${sqlNum(r.nfa_per_unit)},${sqlNum(r.asp_psf)},${sqlNum(r.bumi_pct)},${sqlNum(r.cross_subsidy_amt)},${sqlNum(r.carpark_revenue)},${i})`).join(',');
+      await fabricFetch(`INSERT INTO dbo.sales(snapshot_id,l3_phase,l4_subphase,l5_component,product_type,units,nfa_per_unit,asp_psf,bumi_pct,cross_subsidy_amt,carpark_revenue,sort_order)VALUES${v}`);
+    }
+    // 4 — cost
+    if(p.costRows.length){
+      const v=p.costRows.map((r,i)=>`(${sqlVal(sid)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${sqlVal(r.l5_component)},${sqlVal(r.pillar_code)},${sqlVal(r.item_code)},${sqlVal(r.description)},${sqlNum(r.budget_amt)},${r.sort_order??i})`).join(',');
+      await fabricFetch(`INSERT INTO dbo.cost(snapshot_id,l3_phase,l4_subphase,l5_component,pillar_code,item_code,description,budget_amt,sort_order)VALUES${v}`);
+    }
     if(saveBtn)saveBtn.textContent='✓ Saved';
     setTimeout(()=>{if(saveBtn)saveBtn.textContent=orig;},2000);
-  }catch(e){
-    alert('Save failed: '+e.message);
-    if(saveBtn)saveBtn.textContent=orig;
-  }
+  }catch(e){alert('Save failed: '+e.message);if(saveBtn)saveBtn.textContent=orig;}
 }
 
 async function openLoad(){
@@ -1091,15 +1202,13 @@ async function openLoad(){
   list.innerHTML='<div class="modal-empty">Loading…</div>';
   document.getElementById('load-modal').classList.add('open');
   try{
-    const res=await sbFetch('/rest/v1/snapshots?select=id,project_name,stage,version_date&order=created_at.desc');
-    if(!res.ok)throw new Error(await res.text());
-    const snaps=await res.json();
+    const snaps=await fabricFetch(`SELECT id,project_name,project_code,stage,status,version_date,created_at FROM dbo.snapshots ORDER BY created_at DESC`);
     if(!snaps.length){list.innerHTML='<div class="modal-empty">No saved feasibilities yet.</div>';return;}
     list.innerHTML=snaps.map(s=>`
       <div class="modal-row" onclick="loadSnapshot('${s.id}')">
         <span class="modal-name">${s.project_name||'Untitled'}</span>
         <span class="modal-stage">${s.stage||'BD'}</span>
-        <span class="modal-date">${s.version_date||'—'}</span>
+        <span class="modal-date">${(s.version_date||'').substring(0,10)||'—'}</span>
       </div>`).join('');
   }catch(e){list.innerHTML='<div class="modal-empty">Error: '+e.message+'</div>';}
 }
@@ -1110,15 +1219,13 @@ async function loadSnapshot(id){
   closeLoad();
   if(!confirm('Load this feasibility? Current data will be replaced.'))return;
   try{
-    const [snapRes,hierRes,salesRes,costRes]=await Promise.all([
-      sbFetch('/rest/v1/snapshots?id=eq.'+id+'&select=*'),
-      sbFetch('/rest/v1/hierarchy?snapshot_id=eq.'+id+'&order=l3_sort_order,l4_sort_order'),
-      sbFetch('/rest/v1/sales?snapshot_id=eq.'+id+'&order=sort_order'),
-      sbFetch('/rest/v1/cost?snapshot_id=eq.'+id+'&order=sort_order'),
+    const [snaps,hierarchy,sales,costs]=await Promise.all([
+      fabricFetch(`SELECT * FROM dbo.snapshots WHERE id='${esc(id)}'`),
+      fabricFetch(`SELECT * FROM dbo.hierarchy WHERE snapshot_id='${esc(id)}' ORDER BY l3_sort_order,l4_sort_order`),
+      fabricFetch(`SELECT * FROM dbo.sales WHERE snapshot_id='${esc(id)}' ORDER BY sort_order`),
+      fabricFetch(`SELECT * FROM dbo.cost WHERE snapshot_id='${esc(id)}' ORDER BY sort_order`),
     ]);
-    const [snap]=await snapRes.json();
-    const [hierarchy,sales,costs]=await Promise.all([hierRes.json(),salesRes.json(),costRes.json()]);
-    restoreFromSupabase(snap,hierarchy,sales,costs);
+    restoreFromSupabase(snaps[0],hierarchy,sales,costs);
   }catch(e){alert('Load failed: '+e.message);}
 }
 
@@ -1240,6 +1347,16 @@ totalDiv.id='pc-total';totalDiv.className='pc';totalDiv.style.padding='20px';
 totalDiv.innerHTML='<p style="color:#aaa;padding:40px;text-align:center">Add phases and enter data to see the consolidated total.</p>';
 document.getElementById('phase-contents').appendChild(totalDiv);
 addPhase('Phase 1');
+
+// MSAL: check sign-in state on load
+msalReady().then(()=>{
+  const accs=msalApp.getAllAccounts();
+  if(accs.length){
+    document.getElementById('user-label').textContent=accs[0].username;
+  } else {
+    document.getElementById('login-btn').style.display='';
+  }
+});
 </script>
 </body>
 </html>
