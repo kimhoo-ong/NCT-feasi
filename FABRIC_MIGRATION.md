@@ -94,37 +94,36 @@ Run these statements in Fabric Warehouse (Query editor or SSMS connected to the 
 -- Run once. Drop tables first if recreating from scratch.
 -- ============================================================
 
--- Snapshot version index
+-- NOTE: Fabric Warehouse does not support PRIMARY KEY, FOREIGN KEY,
+-- DEFAULT, UNIQUE, or CHECK constraints in CREATE TABLE.
+-- Columns only. id is supplied by the app (crypto.randomUUID());
+-- created_at is supplied via SYSDATETIME() in the INSERT statement.
+
 CREATE TABLE dbo.snapshots (
-    id             UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID() PRIMARY KEY,
+    id             UNIQUEIDENTIFIER,
     project_name   NVARCHAR(255),
     project_code   NVARCHAR(100),
+    stage          NVARCHAR(10),
+    scenario       NVARCHAR(50),
+    status         NVARCHAR(50),
+    version_date   DATE,
+    wacc           DECIMAL(6,4),
+    created_at     DATETIME2
+);
+
+CREATE TABLE dbo.hierarchy (
+    snapshot_id    UNIQUEIDENTIFIER,
     l1_company     NVARCHAR(255),
     l2_plot_code   NVARCHAR(100),
     l2_plot_name   NVARCHAR(255),
-    location       NVARCHAR(255),
-    stage          NVARCHAR(10),      -- BD / R1 / R2 / R3
-    scenario       NVARCHAR(50),      -- Base / Upside / Downside
-    status         NVARCHAR(50),      -- Draft / Final / Approved
-    version_date   DATE,
-    wacc           DECIMAL(6,4),
-    created_at     DATETIME2 NOT NULL DEFAULT SYSDATETIME()
-);
-
--- Phase / sub-phase hierarchy  
-CREATE TABLE dbo.hierarchy (
-    id             INT IDENTITY(1,1) PRIMARY KEY,
-    snapshot_id    UNIQUEIDENTIFIER NOT NULL REFERENCES dbo.snapshots(id),
     l3_phase       NVARCHAR(255),
     l4_subphase    NVARCHAR(255),
     l3_sort_order  INT,
     l4_sort_order  INT
 );
 
--- Sales inputs per component
 CREATE TABLE dbo.sales (
-    id               INT IDENTITY(1,1) PRIMARY KEY,
-    snapshot_id      UNIQUEIDENTIFIER NOT NULL REFERENCES dbo.snapshots(id),
+    snapshot_id      UNIQUEIDENTIFIER,
     l3_phase         NVARCHAR(255),
     l4_subphase      NVARCHAR(255),
     l5_component     NVARCHAR(255),
@@ -138,25 +137,17 @@ CREATE TABLE dbo.sales (
     sort_order       INT
 );
 
--- Cost line items (pillar breakdown + common cost)
 CREATE TABLE dbo.cost (
-    id             INT IDENTITY(1,1) PRIMARY KEY,
-    snapshot_id    UNIQUEIDENTIFIER NOT NULL REFERENCES dbo.snapshots(id),
+    snapshot_id    UNIQUEIDENTIFIER,
     l3_phase       NVARCHAR(255),
     l4_subphase    NVARCHAR(255),
-    l5_component   NVARCHAR(255),    -- '' = common cost sentinel
-    pillar_code    NVARCHAR(20),     -- P1–P5
+    l5_component   NVARCHAR(255),
+    pillar_code    NVARCHAR(20),
     item_code      NVARCHAR(100),
     description    NVARCHAR(500),
     budget_amt     DECIMAL(18,2),
     sort_order     INT
 );
-GO
-
--- Optional: indexes for load performance
-CREATE INDEX ix_hierarchy_snap  ON dbo.hierarchy (snapshot_id);
-CREATE INDEX ix_sales_snap      ON dbo.sales     (snapshot_id);
-CREATE INDEX ix_cost_snap       ON dbo.cost      (snapshot_id);
 GO
 ```
 
