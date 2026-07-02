@@ -1037,7 +1037,7 @@ function downloadPipeline(){
   phases.forEach((p,i)=>phRows.push(['P'+(i+1),p.name,meta.code,meta.stage]));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(phRows),'tbl_PHASE');
   const salesRows=[['l3_phase_code','l4_subphase','l5_component','product_type','units','nfa_per_unit','asp_psf','bumi_pct','cross_subsidy_amt','carpark_revenue','gross_gdv','net_gdv','stage']];
-  const costRows=[['l3_phase_code','l4_subphase','l5_component','pillar_code','item_code','description','budget_amt','stage']];
+  const costRows=[['l3_phase_code','l4_subphase','l5_component','pillar_code','item_code','item_description','budget_amt','stage']];
   phases.forEach((ph,pIdx)=>{
     for(let s=0;s<spCount[pIdx];s++){
       const sp=readSPData(pIdx,s);if(!sp)continue;
@@ -1153,7 +1153,7 @@ function buildSavePayload(){
         if(item.amt>0||item.code)costRows.push({
           l3_phase:ph.name,l4_subphase:sp.spName,l5_component:'',
           pillar_code:item.pillar||'COMMON',item_code:item.code||'',
-          description:item.desc||'',budget_amt:item.amt||0,sort_order:iSort,
+          item_description:item.desc||'',budget_amt:item.amt||0,sort_order:iSort,
         });
       });
       sp.components.forEach((c,cSort)=>{
@@ -1167,7 +1167,7 @@ function buildSavePayload(){
           if(item.budget>0||item.code)costRows.push({
             l3_phase:ph.name,l4_subphase:sp.spName,l5_component:c.name,
             pillar_code:item.pillar,item_code:item.code||'',
-            description:item.desc||'',budget_amt:item.budget||0,sort_order:iSort,
+            item_description:item.desc||'',budget_amt:item.budget||0,sort_order:iSort,
           });
         });
       });
@@ -1204,8 +1204,8 @@ async function saveSnapshot(){
     }
     // 4 — cost
     if(p.costRows.length){
-      const v=p.costRows.map((r,i)=>`(${sqlVal(sid)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${sqlVal(r.l5_component)},${sqlVal(r.pillar_code)},${sqlVal(r.item_code)},${sqlVal(r.description)},${sqlNum(r.budget_amt)},${r.sort_order??i})`).join(',');
-      await fabricFetch(`INSERT INTO dbo.cost(snapshot_id,l3_phase,l4_subphase,l5_component,pillar_code,item_code,description,budget_amt,sort_order)VALUES${v}`);
+      const v=p.costRows.map((r,i)=>`(${sqlVal(sid)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${sqlVal(r.l5_component)},${sqlVal(r.pillar_code)},${sqlVal(r.item_code)},${sqlVal(r.item_description)},${sqlNum(r.budget_amt)},${r.sort_order??i})`).join(',');
+      await fabricFetch(`INSERT INTO dbo.cost(snapshot_id,l3_phase,l4_subphase,l5_component,pillar_code,item_code,item_description,budget_amt,sort_order)VALUES${v}`);
     }
     if(saveBtn)saveBtn.textContent='✓ Saved';
     setTimeout(()=>{if(saveBtn)saveBtn.textContent=orig;},2000);
@@ -1297,7 +1297,7 @@ function restoreFromSupabase(snap,hierarchy,sales,costs){
         const ccBody=document.getElementById('cc-body-'+pIdx+'-'+spIdx);
         const ccChev=document.getElementById('cc-chev-'+pIdx+'-'+spIdx);
         if(ccBody){ccBody.style.display='';if(ccChev)ccChev.textContent='▼';}
-        ccRows.forEach(r=>addCCItem(pIdx,spIdx,r.pillar_code,r.item_code,r.description,r.budget_amt));
+        ccRows.forEach(r=>addCCItem(pIdx,spIdx,r.pillar_code,r.item_code,r.item_description,r.budget_amt));
       }
 
       // Remove default component from addSubphase
@@ -1332,8 +1332,8 @@ function restoreFromSupabase(snap,hierarchy,sales,costs){
         // Unique items ordered by sort_order
         const seen=new Set();const uniqueItems=[];
         [...pillarCosts].sort((a,b)=>a.sort_order-b.sort_order).forEach(c=>{
-          const key=(c.item_code||'')+'||'+(c.description||'');
-          if(!seen.has(key)){seen.add(key);uniqueItems.push({code:c.item_code||'',desc:c.description||''});}
+          const key=(c.item_code||'')+'||'+(c.item_description||'');
+          if(!seen.has(key)){seen.add(key);uniqueItems.push({code:c.item_code||'',desc:c.item_description||''});}
         });
         uniqueItems.forEach(item=>{
           addPillarItem(pIdx,spIdx,p.code,p.prefix);
