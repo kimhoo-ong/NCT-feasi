@@ -1175,8 +1175,8 @@ async function saveSnapshot(){
   try{
     const p=buildSavePayload();const s=p.snapshot;
     const sid=crypto.randomUUID();
-    // 1 — snapshot
-    await fabricFetch(`INSERT INTO dbo.snapshots(id,project_name,project_code,stage,scenario,status,version_date,wacc)VALUES(${sqlVal(sid)},${sqlVal(s.project_name)},${sqlVal(s.project_code)},${sqlVal(s.stage)},${sqlVal(s.scenario)},${sqlVal(s.status)},${sqlVal(s.version_date)},${sqlNum(s.wacc)})`);
+    // 1 — snapshot (created_at supplied explicitly; Fabric Warehouse has no DEFAULT support)
+    await fabricFetch(`INSERT INTO dbo.snapshots(id,project_name,project_code,stage,scenario,status,version_date,wacc,created_at)VALUES(${sqlVal(sid)},${sqlVal(s.project_name)},${sqlVal(s.project_code)},${sqlVal(s.stage)},${sqlVal(s.scenario)},${sqlVal(s.status)},${sqlVal(s.version_date)},${sqlNum(s.wacc)},SYSDATETIME())`);
     // 2 — hierarchy
     if(p.hierarchyRows.length){
       const v=p.hierarchyRows.map(r=>`(${sqlVal(sid)},${sqlVal(r.l1_company)},${sqlVal(r.l2_plot_code)},${sqlVal(r.l2_plot_name)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${r.l3_sort_order},${r.l4_sort_order})`).join(',');
