@@ -108,7 +108,7 @@ CREATE TABLE dbo.snapshots (
     status         VARCHAR(50),
     version_date   DATE,
     wacc           DECIMAL(6,4),
-    created_at     DATETIME2
+    created_at     DATETIME2(6)
 );
 
 CREATE TABLE dbo.hierarchy (
