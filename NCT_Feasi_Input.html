@@ -161,6 +161,7 @@ select.inp{cursor:pointer;padding:3px 5px}
   <div class="hdr-r">
     <a href="GUIDE.html" target="_blank" class="btn ghost" style="text-decoration:none">? Help</a>
     <span id="user-label" style="font-size:11px;color:rgba(255,255,255,.6);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+    <button id="logout-btn" class="btn ghost" onclick="signOut()" style="display:none">Sign Out</button>
     <button id="login-btn" class="btn ghost" onclick="signIn()" style="display:none">🔑 Sign In</button>
     <button class="btn ghost" onclick="openLoad()">⬆ Load</button>
     <button class="btn ghost" onclick="saveSnapshot()">💾 Save</button>
@@ -1083,11 +1084,25 @@ function msalReady(){
   return _msalReady;
 }
 
+function updateAuthUI(){
+  const accs=msalApp?msalApp.getAllAccounts():[];
+  const in_=accs.length>0;
+  document.getElementById('user-label').textContent=in_?accs[0].username:'';
+  document.getElementById('logout-btn').style.display=in_?'':'none';
+  document.getElementById('login-btn').style.display=in_?'none':'';
+}
+
 async function signIn(){
   await msalReady();
-  const r=await msalApp.loginPopup({scopes:FABRIC_SCOPES});
-  document.getElementById('user-label').textContent=r.account.username;
-  document.getElementById('login-btn').style.display='none';
+  await msalApp.loginPopup({scopes:FABRIC_SCOPES});
+  updateAuthUI();
+}
+
+async function signOut(){
+  await msalReady();
+  const accs=msalApp.getAllAccounts();
+  if(accs.length)await msalApp.logoutPopup({account:accs[0]});
+  updateAuthUI();
 }
 
 async function getAccessToken(){
@@ -1349,14 +1364,7 @@ document.getElementById('phase-contents').appendChild(totalDiv);
 addPhase('Phase 1');
 
 // MSAL: check sign-in state on load
-msalReady().then(()=>{
-  const accs=msalApp.getAllAccounts();
-  if(accs.length){
-    document.getElementById('user-label').textContent=accs[0].username;
-  } else {
-    document.getElementById('login-btn').style.display='';
-  }
-});
+msalReady().then(()=>updateAuthUI());
 </script>
 </body>
 </html>
