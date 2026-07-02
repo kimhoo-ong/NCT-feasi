@@ -1066,9 +1066,7 @@ function downloadPipeline(){
 // ─── Fabric / MSAL ───
 const MSAL_CLIENT_ID   = '86f52802-9904-41bb-aa19-355ab415a104';
 const MSAL_TENANT_ID   = '621ff01b-cd58-4fa0-8bec-2b29fe71ec6e';
-const FABRIC_WORKSPACE = '6df5a7e8-4075-4dcb-9c72-02ea29ad61c0';
-const FABRIC_WAREHOUSE = '6d6f60fe-79b1-4f38-9480-526cc357d65e';
-const FABRIC_ENDPOINT  = `https://api.fabric.microsoft.com/v1/workspaces/${FABRIC_WORKSPACE}/warehouses/${FABRIC_WAREHOUSE}/queryexecution`;
+const GRAPHQL_ENDPOINT = 'https://6df5a7e840754dcb9c7202ea29ad61c0.z6d.graphql.fabric.microsoft.com/v1/workspaces/6df5a7e8-4075-4dcb-9c72-02ea29ad61c0/graphqlapis/bac828cf-b154-479e-a528-1d1203e9b071/graphql';
 const FABRIC_SCOPES    = ['https://api.fabric.microsoft.com/.default'];
 
 let msalApp=null;
@@ -1116,26 +1114,29 @@ async function getAccessToken(){
   }
 }
 
-function esc(v){return String(v??'').replace(/'/g,"''");}
-function sqlVal(v){return v==null||v===''?'NULL':`'${esc(v)}'`;}
-function sqlNum(v){const n=parseFloat(v);return isNaN(n)?'NULL':n;}
-
-async function fabricFetch(sql){
+async function gqlFetch(query,variables={}){
   const token=await getAccessToken();
-  const res=await fetch(FABRIC_ENDPOINT,{
+  const res=await fetch(GRAPHQL_ENDPOINT,{
     method:'POST',
     headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify({statements:[{statement:sql}]}),
+    body:JSON.stringify({query,variables}),
   });
-  if(!res.ok){const t=await res.text();throw new Error(`Fabric ${res.status}: ${t}`);}
+  if(!res.ok){const t=await res.text();throw new Error(`GQL ${res.status}: ${t}`);}
   const json=await res.json();
-  const result=json?.results?.[0];
-  if(!result)return[];
-  // Normalise column list (API shape may vary in preview)
-  const cols=(result.schema?.columns||result.columns||[]).map(c=>c.name||c);
-  const rows=result.data||result.rows||[];
-  if(!cols.length)return[];
-  return rows.map(row=>{const o={};cols.forEach((c,i)=>{o[c]=row[i];});return o;});
+  if(json.errors?.length)throw new Error(json.errors.map(e=>e.message).join('; '));
+  return json.data;
+}
+
+async function gqlInsertMany(mutation,inputType,rows){
+  if(!rows.length)return;
+  const CHUNK=20;
+  for(let off=0;off<rows.length;off+=CHUNK){
+    const chunk=rows.slice(off,off+CHUNK);
+    const vars={};
+    const defs=chunk.map((_,j)=>`$v${j}:${inputType}!`).join(',');
+    const ops=chunk.map((row,j)=>{vars[`v${j}`]=row;return `r${j}:${mutation}(item:$v${j}){result{__typename}}`;}).join(' ');
+    await gqlFetch(`mutation(${defs}){${ops}}`,vars);
+  }
 }
 
 function buildSavePayload(){
@@ -1190,23 +1191,26 @@ async function saveSnapshot(){
   try{
     const p=buildSavePayload();const s=p.snapshot;
     const sid=crypto.randomUUID();
-    // 1 — snapshot (created_at supplied explicitly; Fabric Warehouse has no DEFAULT support)
-    await fabricFetch(`INSERT INTO dbo.snapshots(id,project_name,project_code,stage,scenario,status,version_date,wacc,created_at)VALUES(${sqlVal(sid)},${sqlVal(s.project_name)},${sqlVal(s.project_code)},${sqlVal(s.stage)},${sqlVal(s.scenario)},${sqlVal(s.status)},${sqlVal(s.version_date)},${sqlNum(s.wacc)},SYSDATETIME())`);
-    // 2 — hierarchy
-    if(p.hierarchyRows.length){
-      const v=p.hierarchyRows.map(r=>`(${sqlVal(sid)},${sqlVal(r.l1_company)},${sqlVal(r.l2_plot_code)},${sqlVal(r.l2_plot_name)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${r.l3_sort_order},${r.l4_sort_order})`).join(',');
-      await fabricFetch(`INSERT INTO dbo.hierarchy(snapshot_id,l1_company,l2_plot_code,l2_plot_name,l3_phase,l4_subphase,l3_sort_order,l4_sort_order)VALUES${v}`);
-    }
-    // 3 — sales
-    if(p.salesRows.length){
-      const v=p.salesRows.map((r,i)=>`(${sqlVal(sid)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${sqlVal(r.l5_component)},${sqlVal(r.product_type)},${sqlNum(r.units)},${sqlNum(r.nfa_per_unit)},${sqlNum(r.asp_psf)},${sqlNum(r.bumi_pct)},${sqlNum(r.cross_subsidy_amt)},${sqlNum(r.carpark_revenue)},${i})`).join(',');
-      await fabricFetch(`INSERT INTO dbo.sales(snapshot_id,l3_phase,l4_subphase,l5_component,product_type,units,nfa_per_unit,asp_psf,bumi_pct,cross_subsidy_amt,carpark_revenue,sort_order)VALUES${v}`);
-    }
-    // 4 — cost
-    if(p.costRows.length){
-      const v=p.costRows.map((r,i)=>`(${sqlVal(sid)},${sqlVal(r.l3_phase)},${sqlVal(r.l4_subphase)},${sqlVal(r.l5_component)},${sqlVal(r.pillar_code)},${sqlVal(r.item_code)},${sqlVal(r.item_description)},${sqlNum(r.budget_amt)},${r.sort_order??i})`).join(',');
-      await fabricFetch(`INSERT INTO dbo.cost(snapshot_id,l3_phase,l4_subphase,l5_component,pillar_code,item_code,item_description,budget_amt,sort_order)VALUES${v}`);
-    }
+    await gqlFetch(`mutation($item:snapshotsCreateInput!){createSnapshots(item:$item){result{id}}}`,
+      {item:{id:sid,project_name:s.project_name||null,project_code:s.project_code||null,
+        stage:s.stage||null,scenario:s.scenario||null,status:s.status||null,
+        version_date:s.version_date||null,wacc:s.wacc??null,
+        created_at:new Date().toISOString()}});
+    await gqlInsertMany('createHierarchy','hierarchyCreateInput',p.hierarchyRows.map(r=>({
+      snapshot_id:sid,l1_company:r.l1_company||null,l2_plot_code:r.l2_plot_code||null,
+      l2_plot_name:r.l2_plot_name||null,l3_phase:r.l3_phase||null,l4_subphase:r.l4_subphase||null,
+      l3_sort_order:r.l3_sort_order,l4_sort_order:r.l4_sort_order})));
+    await gqlInsertMany('createSales','salesCreateInput',p.salesRows.map(r=>({
+      snapshot_id:sid,l3_phase:r.l3_phase||null,l4_subphase:r.l4_subphase||null,
+      l5_component:r.l5_component||null,product_type:r.product_type||null,
+      units:r.units||null,nfa_per_unit:r.nfa_per_unit||null,asp_psf:r.asp_psf||null,
+      bumi_pct:r.bumi_pct||null,cross_subsidy_amt:r.cross_subsidy_amt||null,
+      carpark_revenue:r.carpark_revenue||null,sort_order:r.sort_order??0})));
+    await gqlInsertMany('createCost1','cost1CreateInput',p.costRows.map((r,i)=>({
+      snapshot_id:sid,l3_phase:r.l3_phase||null,l4_subphase:r.l4_subphase||null,
+      l5_component:r.l5_component||null,pillar_code:r.pillar_code||null,
+      item_code:r.item_code||null,item_description:r.item_description||null,
+      budget_amt:r.budget_amt||null,sort_order:r.sort_order??i})));
     if(saveBtn)saveBtn.textContent='✓ Saved';
     setTimeout(()=>{if(saveBtn)saveBtn.textContent=orig;},2000);
   }catch(e){alert('Save failed: '+e.message);if(saveBtn)saveBtn.textContent=orig;}
@@ -1217,7 +1221,8 @@ async function openLoad(){
   list.innerHTML='<div class="modal-empty">Loading…</div>';
   document.getElementById('load-modal').classList.add('open');
   try{
-    const snaps=await fabricFetch(`SELECT id,project_name,project_code,stage,status,version_date,created_at FROM dbo.snapshots ORDER BY created_at DESC`);
+    const data=await gqlFetch(`query{snapshots(orderBy:{created_at:DESC}){items{id project_name project_code stage status version_date created_at}}}`);
+    const snaps=data.snapshots?.items||[];
     if(!snaps.length){list.innerHTML='<div class="modal-empty">No saved feasibilities yet.</div>';return;}
     list.innerHTML=snaps.map(s=>`
       <div class="modal-row" onclick="loadSnapshot('${s.id}')">
@@ -1234,13 +1239,18 @@ async function loadSnapshot(id){
   closeLoad();
   if(!confirm('Load this feasibility? Current data will be replaced.'))return;
   try{
-    const [snaps,hierarchy,sales,costs]=await Promise.all([
-      fabricFetch(`SELECT * FROM dbo.snapshots WHERE id='${esc(id)}'`),
-      fabricFetch(`SELECT * FROM dbo.hierarchy WHERE snapshot_id='${esc(id)}' ORDER BY l3_sort_order,l4_sort_order`),
-      fabricFetch(`SELECT * FROM dbo.sales WHERE snapshot_id='${esc(id)}' ORDER BY sort_order`),
-      fabricFetch(`SELECT * FROM dbo.cost WHERE snapshot_id='${esc(id)}' ORDER BY sort_order`),
+    const [sData,hData,salData,cData]=await Promise.all([
+      gqlFetch(`query($id:String!){snapshots(filter:{id:{eq:$id}}){items{id project_name project_code stage scenario status version_date wacc}}}`,{id}),
+      gqlFetch(`query($id:String!){hierarchy(filter:{snapshot_id:{eq:$id}},orderBy:{l3_sort_order:ASC}){items{l1_company l2_plot_code l2_plot_name l3_phase l4_subphase l3_sort_order l4_sort_order}}}`,{id}),
+      gqlFetch(`query($id:String!){sales(filter:{snapshot_id:{eq:$id}},orderBy:{sort_order:ASC}){items{l3_phase l4_subphase l5_component product_type units nfa_per_unit asp_psf bumi_pct cross_subsidy_amt carpark_revenue sort_order}}}`,{id}),
+      gqlFetch(`query($id:String!){cost1(filter:{snapshot_id:{eq:$id}},orderBy:{sort_order:ASC}){items{l3_phase l4_subphase l5_component pillar_code item_code item_description budget_amt sort_order}}}`,{id}),
     ]);
-    restoreFromSupabase(snaps[0],hierarchy,sales,costs);
+    restoreFromSupabase(
+      sData.snapshots?.items?.[0],
+      hData.hierarchy?.items||[],
+      salData.sales?.items||[],
+      cData.cost1?.items||[]
+    );
   }catch(e){alert('Load failed: '+e.message);}
 }
 
