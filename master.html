@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NCT — Master Data</title>
+  <script src="https://alcdn.msauth.net/browser/3.27.0/js/msal-browser.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f6fb;color:#1a1a2e;min-height:100vh}
+    header{background:#0F3460;color:#fff;display:flex;align-items:center;gap:12px;padding:0 24px;height:52px}
+    .hdr-title{font-weight:700;font-size:15px;letter-spacing:.5px}
+    .hdr-sub{font-size:11px;color:rgba(255,255,255,.5)}
+    .hdr-sep{flex:1}
+    #user-label{font-size:11px;color:rgba(255,255,255,.6);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:background .15s;text-decoration:none;display:inline-block}
+    .btn.primary{background:#0F3460;color:#fff}.btn.primary:hover{background:#0a2647}
+    .btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}.btn.ghost:hover{background:rgba(255,255,255,.1)}
+    .btn.danger{background:#fee2e2;color:#dc2626}.btn.danger:hover{background:#fecaca}
+    .btn.sm{padding:4px 10px;font-size:12px}
+    .tabs{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;display:flex}
+    .tab{padding:14px 20px;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;border-bottom:3px solid transparent;transition:all .15s}
+    .tab.active{color:#0F3460;border-bottom-color:#0F3460}
+    .tab:hover:not(.active){color:#0F3460}
+    .content{padding:24px;max-width:960px;margin:0 auto}
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .section-title{font-size:16px;font-weight:700;color:#0F3460}
+    .section-count{font-size:12px;color:#94a3b8;margin-left:8px}
+    .tbl-wrap{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead th{background:#f8fafc;color:#475569;font-weight:600;padding:10px 14px;text-align:left;border-bottom:1px solid #e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+    tbody tr{border-bottom:1px solid #f1f5f9;transition:background .1s}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:#f8fafc}
+    td{padding:10px 14px;color:#334155}
+    .td-code{font-family:monospace;font-size:12px;color:#0F3460;font-weight:600}
+    .td-actions{width:120px;text-align:right;white-space:nowrap}
+    .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700}
+    .tag-IC{background:#dbeafe;color:#1d4ed8}
+    .tag-EC{background:#fef3c7;color:#d97706}
+    .tag-D{background:#dcfce7;color:#15803d}
+    .pillar-hdr td{background:#f0f4ff!important;font-weight:700;color:#0F3460;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+    .modal-backdrop.open{display:flex}
+    .modal{background:#fff;border-radius:12px;padding:28px;width:420px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+    .modal-title{font-size:16px;font-weight:700;color:#0F3460;margin-bottom:20px}
+    .form-row{margin-bottom:14px}
+    .form-row label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px}
+    .form-row input,.form-row select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;color:#1a1a2e}
+    .form-row input:focus,.form-row select:focus{outline:none;border-color:#0F3460}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+    .empty{padding:48px;text-align:center;color:#94a3b8;font-size:14px}
+    .loading{padding:32px;text-align:center;color:#94a3b8}
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="hdr-title">NCT Master Data</div>
+    <div class="hdr-sub">Cost Items &amp; Component Types</div>
+  </div>
+  <div class="hdr-sep"></div>
+  <span id="user-label"></span>
+  <button id="logout-btn" class="btn ghost" onclick="signOut()" style="display:none">Sign Out</button>
+  <button id="login-btn" class="btn ghost" onclick="signIn()" style="display:none">&#128273; Sign In</button>
+  <a href="NCT_Feasi_Input.html" class="btn ghost" style="margin-left:8px">&#8592; Feasibility</a>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('cost')">Cost Items</div>
+  <div class="tab" onclick="switchTab('comp')">Component Types</div>
+</div>
+
+<div class="content">
+  <div id="panel-cost">
+    <div class="section-header">
+      <div><span class="section-title">Cost Items</span><span class="section-count" id="cost-count"></span></div>
+      <button class="btn primary" onclick="openCostModal()">+ Add Item</button>
+    </div>
+    <div class="tbl-wrap"><div id="cost-table-wrap"><div class="loading">Loading…</div></div></div>
+  </div>
+
+  <div id="panel-comp" style="display:none">
+    <div class="section-header">
+      <div><span class="section-title">Component Types</span><span class="section-count" id="comp-count"></span></div>
+      <button class="btn primary" onclick="openCompModal()">+ Add Type</button>
+    </div>
+    <div class="tbl-wrap"><div id="comp-table-wrap"><div class="loading">Loading…</div></div></div>
+  </div>
+</div>
+
+<!-- Cost Item Modal -->
+<div class="modal-backdrop" id="cost-modal">
+  <div class="modal">
+    <div class="modal-title" id="cost-modal-title">Add Cost Item</div>
+    <div class="form-row"><label>Pillar</label>
+      <select id="ci-pillar">
+        <option value="P1">P1 — Land Cost</option>
+        <option value="P2">P2 — Construction</option>
+        <option value="P3">P3 — Infrastructure</option>
+        <option value="P4">P4 — Professional Fees</option>
+        <option value="P5">P5 — Finance, Sales &amp; Mkt</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Item Code</label><input id="ci-code" placeholder="e.g. C.PILE"/></div>
+    <div class="form-row"><label>Description</label><input id="ci-desc" placeholder="e.g. Piling Works"/></div>
+    <div class="form-row"><label>Default Tag</label>
+      <select id="ci-tag">
+        <option value="D">D — Direct</option>
+        <option value="IC">IC — Included Common</option>
+        <option value="EC">EC — Excluded Common</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeCostModal()">Cancel</button>
+      <button class="btn primary" onclick="saveCostItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Component Type Modal -->
+<div class="modal-backdrop" id="comp-modal">
+  <div class="modal">
+    <div class="modal-title" id="comp-modal-title">Add Component Type</div>
+    <div class="form-row"><label>Component Code</label><input id="ct-code" placeholder="e.g. RES"/></div>
+    <div class="form-row"><label>Component Name</label><input id="ct-name" placeholder="e.g. Residential"/></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeCompModal()">Cancel</button>
+      <button class="btn primary" onclick="saveCompType()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MSAL_CLIENT_ID   = '86f52802-9904-41bb-aa19-355ab415a104';
+const MSAL_TENANT_ID   = '621ff01b-cd58-4fa0-8bec-2b29fe71ec6e';
+const GRAPHQL_ENDPOINT = 'https://6df5a7e840754dcb9c7202ea29ad61c0.z6d.graphql.fabric.microsoft.com/v1/workspaces/6df5a7e8-4075-4dcb-9c72-02ea29ad61c0/graphqlapis/bac828cf-b154-479e-a528-1d1203e9b071/graphql';
+const FABRIC_SCOPES    = ['https://analysis.windows.net/powerbi/api/.default'];
+
+const msalApp=new msal.PublicClientApplication({
+  auth:{clientId:MSAL_CLIENT_ID,authority:'https://login.microsoftonline.com/'+MSAL_TENANT_ID,redirectUri:location.origin+location.pathname},
+  cache:{cacheLocation:'sessionStorage'}
+});
+const msalReady=(async()=>{await msalApp.initialize();await msalApp.handleRedirectPromise();updateAuthUI();})();
+
+function updateAuthUI(){
+  const accs=msalApp.getAllAccounts();const in_=accs.length>0;
+  document.getElementById('user-label').textContent=in_?accs[0].username:'';
+  document.getElementById('logout-btn').style.display=in_?'':'none';
+  document.getElementById('login-btn').style.display=in_?'none':'';
+}
+async function signIn(){await msalReady;await msalApp.loginPopup({scopes:FABRIC_SCOPES});updateAuthUI();loadAll();}
+async function signOut(){await msalReady;await msalApp.logoutPopup({account:msalApp.getAllAccounts()[0]});updateAuthUI();}
+async function getAccessToken(){
+  await msalReady;
+  let accs=msalApp.getAllAccounts();
+  if(!accs.length){await msalApp.loginPopup({scopes:FABRIC_SCOPES});updateAuthUI();accs=msalApp.getAllAccounts();}
+  const req={scopes:FABRIC_SCOPES,account:accs[0]};
+  try{const r=await msalApp.acquireTokenSilent(req);return r.accessToken;}
+  catch(e){if(e instanceof msal.InteractionRequiredAuthError){const r=await msalApp.acquireTokenPopup(req);return r.accessToken;}throw e;}
+}
+async function gqlFetch(query,variables={}){
+  const token=await getAccessToken();
+  const res=await fetch(GRAPHQL_ENDPOINT,{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({query,variables})});
+  if(!res.ok){const t=await res.text();throw new Error(`GQL ${res.status}: ${t}`);}
+  const json=await res.json();
+  if(json.errors?.length)throw new Error(json.errors.map(e=>e.message).join('; '));
+  return json.data;
+}
+
+// ── Tab ──
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['cost','comp'][i]===tab));
+  document.getElementById('panel-cost').style.display=tab==='cost'?'':'none';
+  document.getElementById('panel-comp').style.display=tab==='comp'?'':'none';
+}
+
+// ── GQL names — adjust if Fabric generates different names ──
+// Check Schema Explorer → Queries/Mutations to verify
+const GQL={
+  costQ:'master_cost_items',
+  compQ:'master_component_types',
+  costCreate:'createMaster_cost_items',
+  costUpdate:'updateMaster_cost_items',
+  costDelete:'deleteMaster_cost_items',
+  compCreate:'createMaster_component_types',
+  compUpdate:'updateMaster_component_types',
+  compDelete:'deleteMaster_component_types',
+  costCI:'master_cost_itemsCreateInput',
+  costUI:'master_cost_itemsUpdateInput',
+  compCI:'master_component_typesCreateInput',
+  compUI:'master_component_typesUpdateInput',
+};
+
+let costItems=[],compTypes=[];
+
+async function loadAll(){await Promise.all([loadCostItems(),loadCompTypes()]);}
+
+async function loadCostItems(){
+  document.getElementById('cost-table-wrap').innerHTML='<div class="loading">Loading…</div>';
+  try{
+    const data=await gqlFetch(`query{${GQL.costQ}{items{pillar_code item_code item_description default_tag}}}`);
+    costItems=data[GQL.costQ]?.items||[];
+    renderCostTable();
+  }catch(e){document.getElementById('cost-table-wrap').innerHTML=`<div class="empty">Error: ${e.message}</div>`;}
+}
+async function loadCompTypes(){
+  document.getElementById('comp-table-wrap').innerHTML='<div class="loading">Loading…</div>';
+  try{
+    const data=await gqlFetch(`query{${GQL.compQ}{items{component_code component_name}}}`);
+    compTypes=data[GQL.compQ]?.items||[];
+    renderCompTable();
+  }catch(e){document.getElementById('comp-table-wrap').innerHTML=`<div class="empty">Error: ${e.message}</div>`;}
+}
+
+const PILLAR_NAMES={P1:'Land Cost',P2:'Construction',P3:'Infrastructure',P4:'Professional Fees',P5:'Finance, Sales & Mkt'};
+
+function renderCostTable(){
+  document.getElementById('cost-count').textContent=` (${costItems.length})`;
+  if(!costItems.length){document.getElementById('cost-table-wrap').innerHTML='<div class="empty">No cost items yet.</div>';return;}
+  const byPillar={};
+  costItems.forEach(item=>{(byPillar[item.pillar_code]=byPillar[item.pillar_code]||[]).push(item);});
+  let rows='';
+  Object.entries(byPillar).forEach(([pillar,items])=>{
+    rows+=`<tr class="pillar-hdr"><td colspan="4">${pillar} — ${PILLAR_NAMES[pillar]||pillar}</td></tr>`;
+    items.forEach(item=>{
+      const tag=item.default_tag||'D';
+      rows+=`<tr>
+        <td class="td-code">${item.item_code||''}</td>
+        <td>${item.item_description||''}</td>
+        <td><span class="tag tag-${tag}">${tag}</span></td>
+        <td class="td-actions">
+          <button class="btn sm" onclick="editCostItem('${item.item_code}')">Edit</button>
+          <button class="btn sm danger" onclick="deleteCostItem('${item.item_code}')">Del</button>
+        </td>
+      </tr>`;
+    });
+  });
+  document.getElementById('cost-table-wrap').innerHTML=`<table><thead><tr><th>Code</th><th>Description</th><th>Tag</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderCompTable(){
+  document.getElementById('comp-count').textContent=` (${compTypes.length})`;
+  if(!compTypes.length){document.getElementById('comp-table-wrap').innerHTML='<div class="empty">No component types yet.</div>';return;}
+  const rows=compTypes.map(ct=>`<tr>
+    <td class="td-code">${ct.component_code||''}</td>
+    <td>${ct.component_name||''}</td>
+    <td class="td-actions">
+      <button class="btn sm" onclick="editCompType('${ct.component_code}')">Edit</button>
+      <button class="btn sm danger" onclick="deleteCompType('${ct.component_code}')">Del</button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('comp-table-wrap').innerHTML=`<table><thead><tr><th>Code</th><th>Name</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ── Cost Item CRUD ──
+let editingCostCode=null;
+function openCostModal(code=null){
+  editingCostCode=code;
+  const item=code?costItems.find(i=>i.item_code===code):null;
+  document.getElementById('cost-modal-title').textContent=code?'Edit Cost Item':'Add Cost Item';
+  document.getElementById('ci-pillar').value=item?.pillar_code||'P1';
+  document.getElementById('ci-code').value=item?.item_code||'';
+  document.getElementById('ci-desc').value=item?.item_description||'';
+  document.getElementById('ci-tag').value=item?.default_tag||'D';
+  document.getElementById('ci-code').disabled=!!code;
+  document.getElementById('cost-modal').classList.add('open');
+}
+function closeCostModal(){document.getElementById('cost-modal').classList.remove('open');}
+function editCostItem(code){openCostModal(code);}
+
+async function saveCostItem(){
+  const pillar=document.getElementById('ci-pillar').value;
+  const code=document.getElementById('ci-code').value.trim();
+  const desc=document.getElementById('ci-desc').value.trim();
+  const tag=document.getElementById('ci-tag').value;
+  if(!code||!desc){alert('Code and description are required.');return;}
+  try{
+    if(editingCostCode){
+      await gqlFetch(`mutation($item:${GQL.costUI}!){${GQL.costUpdate}(item:$item,filter:{item_code:{eq:"${editingCostCode}"}}){result{item_code}}}`,
+        {item:{pillar_code:pillar,item_description:desc,default_tag:tag}});
+    }else{
+      await gqlFetch(`mutation($item:${GQL.costCI}!){${GQL.costCreate}(item:$item){result{item_code}}}`,
+        {item:{pillar_code:pillar,item_code:code,item_description:desc,default_tag:tag}});
+    }
+    closeCostModal();await loadCostItems();
+  }catch(e){alert('Error: '+e.message);}
+}
+async function deleteCostItem(code){
+  if(!confirm(`Delete "${code}"?`))return;
+  try{
+    await gqlFetch(`mutation{${GQL.costDelete}(filter:{item_code:{eq:"${code}"}}){result{item_code}}}`);
+    await loadCostItems();
+  }catch(e){alert('Error: '+e.message);}
+}
+
+// ── Component Type CRUD ──
+let editingCompCode=null;
+function openCompModal(code=null){
+  editingCompCode=code;
+  const ct=code?compTypes.find(c=>c.component_code===code):null;
+  document.getElementById('comp-modal-title').textContent=code?'Edit Component Type':'Add Component Type';
+  document.getElementById('ct-code').value=ct?.component_code||'';
+  document.getElementById('ct-name').value=ct?.component_name||'';
+  document.getElementById('ct-code').disabled=!!code;
+  document.getElementById('comp-modal').classList.add('open');
+}
+function closeCompModal(){document.getElementById('comp-modal').classList.remove('open');}
+function editCompType(code){openCompModal(code);}
+
+async function saveCompType(){
+  const code=document.getElementById('ct-code').value.trim();
+  const name=document.getElementById('ct-name').value.trim();
+  if(!code||!name){alert('Code and name are required.');return;}
+  try{
+    if(editingCompCode){
+      await gqlFetch(`mutation($item:${GQL.compUI}!){${GQL.compUpdate}(item:$item,filter:{component_code:{eq:"${editingCompCode}"}}){result{component_code}}}`,
+        {item:{component_name:name}});
+    }else{
+      await gqlFetch(`mutation($item:${GQL.compCI}!){${GQL.compCreate}(item:$item){result{component_code}}}`,
+        {item:{component_code:code,component_name:name}});
+    }
+    closeCompModal();await loadCompTypes();
+  }catch(e){alert('Error: '+e.message);}
+}
+async function deleteCompType(code){
+  if(!confirm(`Delete "${code}"?`))return;
+  try{
+    await gqlFetch(`mutation{${GQL.compDelete}(filter:{component_code:{eq:"${code}"}}){result{component_code}}}`);
+    await loadCompTypes();
+  }catch(e){alert('Error: '+e.message);}
+}
+
+// ── Init ──
+msalReady.then(()=>{
+  if(msalApp.getAllAccounts().length>0)loadAll();
+});
+</script>
+</body>
+</html>

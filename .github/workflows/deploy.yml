@@ -27,6 +27,7 @@ jobs:
           mkdir _site
           cp NCT_Feasi_Input.html _site/
           cp GUIDE.html _site/
+          cp master.html _site/
           cp index.html _site/
           cp .nojekyll _site/
 
