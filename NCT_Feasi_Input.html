@@ -1247,15 +1247,15 @@ async function loadSnapshot(id){
     const eid=id.replace(/"/g,'');
     const [sData,hData,salData,cData]=await Promise.all([
       gqlFetch(`query{snapshots(filter:{id:{eq:"${eid}"}}){items{id project_name project_code stage scenario status version_date wacc}}}`),
-      gqlFetch(`query{hierarchy(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{l3_sort_order:ASC}){items{l1_company l2_plot_code l2_plot_name l3_phase l4_subphase l3_sort_order l4_sort_order}}}`),
+      gqlFetch(`query{hierarchies(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{l3_sort_order:ASC}){items{l1_company l2_plot_code l2_plot_name l3_phase l4_subphase l3_sort_order l4_sort_order}}}`),
       gqlFetch(`query{sales(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{sort_order:ASC}){items{l3_phase l4_subphase l5_component product_type units nfa_per_unit asp_psf bumi_pct cross_subsidy_amt carpark_revenue sort_order}}}`),
-      gqlFetch(`query{cost1(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{sort_order:ASC}){items{l3_phase l4_subphase l5_component pillar_code item_code item_description budget_amt sort_order}}}`),
+      gqlFetch(`query{cost1s(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{sort_order:ASC}){items{l3_phase l4_subphase l5_component pillar_code item_code item_description budget_amt sort_order}}}`),
     ]);
     restoreFromSupabase(
       sData.snapshots?.items?.[0],
-      hData.hierarchy?.items||[],
+      hData.hierarchies?.items||[],
       salData.sales?.items||[],
-      cData.cost1?.items||[]
+      cData.cost1s?.items||[]
     );
   }catch(e){alert('Load failed: '+e.message);}
 }
