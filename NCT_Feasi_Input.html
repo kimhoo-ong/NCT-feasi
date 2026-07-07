@@ -152,6 +152,21 @@ select.inp{cursor:pointer;padding:3px 5px}
 .modal-date{font-size:11px;color:#aaa;white-space:nowrap}
 .modal-empty{padding:32px;text-align:center;color:#aaa;font-size:13px}
 .modal-footer{padding:10px 18px;border-top:1px solid #eee;display:flex;justify-content:flex-end}
+
+/* Phase-level CC bar */
+.ph-cc-sec{background:#fffdf5;border:1px solid #fde68a;border-radius:8px;margin-bottom:12px;overflow:hidden}
+.ph-cc-hdr{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;user-select:none}
+.ph-cc-hdr:hover{background:#fff8e8}
+
+/* Tag badges */
+.tag-ic{display:inline-block;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:700;background:#dbeafe;color:#1d4ed8;margin-left:4px;vertical-align:middle}
+.tag-ec{display:inline-block;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:700;background:#fef3c7;color:#d97706;margin-left:4px;vertical-align:middle}
+.tag-d {display:inline-block;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:700;background:#dcfce7;color:#15803d;margin-left:4px;vertical-align:middle}
+
+/* CC pool column in matrix */
+.mtx .cc-th{background:#fffcf0;color:#b45309;font-size:11px;font-weight:700;min-width:100px;text-align:center;border-right:2px solid #fde68a}
+.mtx td.cc-pool{background:#fffcf0;color:#b45309;font-weight:600;border-right:2px solid #fde68a;text-align:right}
+.mtx td.cc-pool-blank{border-right:2px solid #fde68a;background:#fffdf5}
 </style>
 </head>
 <body>
@@ -231,6 +246,20 @@ const fmtPct=(n,gdv)=>gdv>0?(R(n/gdv)*100).toFixed(2)+'%':'—';
 let phases=[];let spCount={};let compCount={};
 let computedSP={};let computedP={};
 let currentTab=0;
+let masterTagMap={};// item_code → default_tag, loaded from master_cost_items
+
+async function loadMasterTags(){
+  try{
+    const data=await gqlFetch('query{master_cost_items{items{item_code default_tag}}}');
+    (data.master_cost_items?.items||[]).forEach(i=>{if(i.item_code)masterTagMap[i.item_code]=i.default_tag||'D';});
+  }catch(e){console.warn('Could not load master tags:',e.message);}
+}
+function tagBadge(code){
+  const t=masterTagMap[code]||'';
+  if(!t)return '';
+  const cls=t==='IC'?'tag-ic':t==='EC'?'tag-ec':'tag-d';
+  return `<span class="${cls}">${t}</span>`;
+}
 
 const PILLARS=[
   {code:'P1',name:'Land Cost',     prefix:'L',items:[['L.PURCHASE','1.1','Land Purchase'],['L.STAMP','1.2','Stamp Duty'],['L.LEGAL','1.3','Legal Fees'],['L.CONV','1.4','Land Conversion Premium'],['L.HOLD','1.5','Holding Cost']]},
@@ -253,6 +282,27 @@ function addPhase(name){
       <div class="kpi-card"><div class="kpi-lbl">GDC</div><div class="kpi-val kpi-gdc">—</div></div>
       <div class="kpi-card"><div class="kpi-lbl">PBT</div><div class="kpi-val kpi-pbt">—</div></div>
       <div class="kpi-card"><div class="kpi-lbl">Margin</div><div class="kpi-val acc kpi-margin">—</div></div>
+    </div>
+    <div class="ph-cc-sec" id="ph-cc-sec-${pIdx}">
+      <div class="ph-cc-hdr" onclick="toggleCC(${pIdx})">
+        <span class="cc-chevron" id="cc-chev-${pIdx}">▶</span>
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#888">Phase Common Cost</span>
+        <span id="cc-sum-${pIdx}" style="font-size:12px;color:#b45309;font-weight:700;margin-left:4px">RM 0</span>
+        <span style="font-size:11px;color:#aaa;margin-left:6px">↳ distributed to all components by NFA</span>
+      </div>
+      <div class="cc-body" id="cc-body-${pIdx}" style="display:none">
+        <table class="cc-tbl" style="margin:0 14px;width:calc(100% - 28px)">
+          <thead><tr>
+            <th style="width:130px">Pillar</th>
+            <th style="width:90px">Code</th>
+            <th>Description</th>
+            <th style="width:130px">Amount (RM)</th>
+            <th style="width:28px"></th>
+          </tr></thead>
+          <tbody id="cc-rows-${pIdx}"></tbody>
+        </table>
+        <button class="add-btn" style="margin:6px 14px 8px" onclick="addCCItem(${pIdx})">+ Add Common Cost Item</button>
+      </div>
     </div>
     <div id="sp-list-${pIdx}"></div>
     <button class="add-btn" onclick="addSubphase(${pIdx})">+ Add Sub-phase (L4)</button>`;
@@ -308,32 +358,12 @@ function addSubphase(pIdx,name){
       </div>
     </div>
     <div id="spb-${id}">
-      <div class="cc-sec" id="cc-sec-${pIdx}-${spIdx}">
-        <div class="cc-hdr" onclick="toggleCC(${pIdx},${spIdx})">
-          <span class="cc-chevron" id="cc-chev-${pIdx}-${spIdx}">▶</span>
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#888">Common Cost</span>
-          <span id="cc-sum-${pIdx}-${spIdx}" style="font-size:12px;color:#b45309;font-weight:700;margin-left:4px">RM 0</span>
-          <span style="font-size:11px;color:#aaa;margin-left:6px">↳ auto-allocated to components by NFA ratio</span>
-        </div>
-        <div class="cc-body" id="cc-body-${pIdx}-${spIdx}" style="display:none">
-          <table class="cc-tbl">
-            <thead><tr>
-              <th style="width:130px">Pillar</th>
-              <th style="width:90px">Code</th>
-              <th>Description</th>
-              <th style="width:130px">Amount (RM)</th>
-              <th style="width:28px"></th>
-            </tr></thead>
-            <tbody id="cc-rows-${pIdx}-${spIdx}"></tbody>
-          </table>
-          <button class="add-btn" style="margin:6px 14px 4px" onclick="addCCItem(${pIdx},${spIdx})">+ Add Common Cost Item</button>
-        </div>
-      </div>
       <div class="matrix-wrap">
         <table class="mtx" id="mtx-${pIdx}-${spIdx}">
           <thead>
             <tr id="mtx-hdr-${pIdx}-${spIdx}">
               <th class="attr-col">Attribute</th>
+              <th class="cc-th">CC Pool</th>
               <th class="add-th" id="mtx-add-th-${pIdx}-${spIdx}">
                 <button class="add-btn-sm" onclick="addComponent(${pIdx},${spIdx})">+ Add</button>
               </th>
@@ -343,17 +373,17 @@ function addSubphase(pIdx,name){
           <tbody id="mtx-body-${pIdx}-${spIdx}">
             <!-- SALES section -->
             <tr class="sec-row"><td class="attr-col" colspan="20">▸ Sales</td></tr>
-            <tr data-a="type"><td class="attr-col">Type</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
-            <tr data-a="units"><td class="attr-col">Units</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-            <tr data-a="nfa_u"><td class="attr-col">NFA / Unit (sqft)</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
-            <tr data-a="tnfa"><td class="attr-col">Total NFA (sqft)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-            <tr data-a="asp"><td class="attr-col">ASP (RM psf)</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
-            <tr data-a="ggdv"><td class="attr-col">Gross GDV (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-            <tr data-a="bumi_pct"><td class="attr-col">Bumi Discount (%)</td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
-            <tr data-a="bumi_amt"><td class="attr-col">Bumi Amt (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-            <tr data-a="subsidy"><td class="attr-col">Cross-subsidy (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-            <tr data-a="carpark"><td class="attr-col">Carpark Revenue (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
-            <tr data-a="ngdv" class="total-row"><td class="attr-col" style="color:#0F3460;font-weight:700">Net GDV (RM)</td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="type"><td class="attr-col">Type</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
+            <tr data-a="units"><td class="attr-col">Units</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="nfa_u"><td class="attr-col">NFA / Unit (sqft)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
+            <tr data-a="tnfa"><td class="attr-col">Total NFA (sqft)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="asp"><td class="attr-col">ASP (RM psf)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
+            <tr data-a="ggdv"><td class="attr-col">Gross GDV (RM)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="bumi_pct"><td class="attr-col">Bumi Discount (%)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd">—</td></tr>
+            <tr data-a="bumi_amt"><td class="attr-col">Bumi Amt (RM)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="subsidy"><td class="attr-col">Cross-subsidy (RM)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="carpark"><td class="attr-col">Carpark Revenue (RM)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
+            <tr data-a="ngdv" class="total-row"><td class="attr-col" style="color:#0F3460;font-weight:700">Net GDV (RM)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td></tr>
             <!-- COST section -->
             <tr class="sec-row cost"><td class="attr-col" colspan="20">▸ Cost</td></tr>
           </tbody>
@@ -385,7 +415,7 @@ function buildPillarRows(pIdx,spIdx){
     pRow.id='prow-'+pIdx+'-'+spIdx+'-'+p.code;
     pRow.dataset.open='1';
     pRow.onclick=()=>togglePillar(pIdx,spIdx,p.code);
-    pRow.innerHTML=`<td class="attr-col">▼ ${p.code} — ${p.name}</td><td class="add-spacer"></td><td class="tcpd num">—</td>`;
+    pRow.innerHTML=`<td class="attr-col">▼ ${p.code} — ${p.name}</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td>`;
     tbody.appendChild(pRow);
     // Default item rows — start open
     p.items.forEach(([code,no,desc],iIdx)=>{
@@ -407,17 +437,17 @@ function buildPillarRows(pIdx,spIdx){
   const gdcRow=document.createElement('tr');
   gdcRow.dataset.a='gdc_total';
   gdcRow.className='total-row';
-  gdcRow.innerHTML=`<td class="attr-col" style="color:#c45;font-weight:700">Total GDC (RM)</td><td class="add-spacer"></td><td class="gdc-total num">—</td>`;
+  gdcRow.innerHTML=`<td class="attr-col" style="color:#c45;font-weight:700">Total GDC (RM)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="gdc-total num">—</td>`;
   tbody.appendChild(gdcRow);
 
   const pbtRow=document.createElement('tr');
   pbtRow.dataset.a='pbt';
-  pbtRow.innerHTML=`<td class="attr-col" style="color:#059669;font-weight:700">PBT (RM)</td><td class="add-spacer"></td><td class="pbt-total num">—</td>`;
+  pbtRow.innerHTML=`<td class="attr-col" style="color:#059669;font-weight:700">PBT (RM)</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="pbt-total num">—</td>`;
   tbody.appendChild(pbtRow);
 
   const mgRow=document.createElement('tr');
   mgRow.dataset.a='margin';
-  mgRow.innerHTML=`<td class="attr-col" style="font-weight:700">Margin</td><td class="add-spacer"></td><td class="mg-total num">—</td>`;
+  mgRow.innerHTML=`<td class="attr-col" style="font-weight:700">Margin</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="mg-total num">—</td>`;
   tbody.appendChild(mgRow);
 }
 
@@ -427,11 +457,20 @@ function makeItemRow(pIdx,spIdx,pCode,iIdx,code,no,desc){
   tr.id='irow-'+pIdx+'-'+spIdx+'-'+pCode+'-'+iIdx;
   tr.dataset.pillar=pCode;
   tr.dataset.iidx=iIdx;
+  const badge=tagBadge(code);
   tr.innerHTML=`<td class="attr-col">
-    <input type="text" class="inp mono i-code" value="${code}" placeholder="CODE" style="width:80px" oninput="csp(${pIdx},${spIdx})">
+    <input type="text" class="inp mono i-code" value="${code}" placeholder="CODE" style="width:80px"
+      oninput="refreshTagBadge(this,${pIdx},${spIdx})">
     <input type="text" class="inp i-desc" value="${desc}" placeholder="Description" style="width:140px;margin-left:4px" oninput="csp(${pIdx},${spIdx})">
-  </td><td class="add-spacer"></td><td class="tcpd num i-total">—</td>`;
+    <span class="row-tag">${badge}</span>
+  </td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num i-total">—</td>`;
   return tr;
+}
+
+function refreshTagBadge(input,pIdx,spIdx){
+  const span=input.closest('td')?.querySelector('.row-tag');
+  if(span)span.innerHTML=tagBadge(input.value.trim());
+  csp(pIdx,spIdx);
 }
 
 function togglePillar(pIdx,spIdx,pCode){
@@ -541,40 +580,43 @@ function addPillarItem(pIdx,spIdx,pCode,prefix){
   csp(pIdx,spIdx);
 }
 
-// ─── Common Cost items ───
-function toggleCC(pIdx,spIdx){
-  const body=document.getElementById('cc-body-'+pIdx+'-'+spIdx);
-  const chev=document.getElementById('cc-chev-'+pIdx+'-'+spIdx);
+// ─── Common Cost items (phase-level) ───
+function toggleCC(pIdx){
+  const body=document.getElementById('cc-body-'+pIdx);
+  const chev=document.getElementById('cc-chev-'+pIdx);
   if(!body)return;
   const open=body.style.display!=='none';
   body.style.display=open?'none':'';
   if(chev)chev.textContent=open?'▶':'▼';
 }
 
-function addCCItem(pIdx,spIdx,pillar='',code='',desc='',amt=''){
-  const tbody=document.getElementById('cc-rows-'+pIdx+'-'+spIdx);if(!tbody)return;
+function addCCItem(pIdx,pillar='',code='',desc='',amt=''){
+  const tbody=document.getElementById('cc-rows-'+pIdx);if(!tbody)return;
   const tr=document.createElement('tr');
   const opts=PILLARS.map(p=>`<option value="${p.code}"${p.code===pillar?' selected':''}>${p.code} — ${p.name}</option>`).join('');
   tr.innerHTML=`
-    <td><select class="inp cc-pillar" onchange="csp(${pIdx},${spIdx})">${opts}</select></td>
-    <td><input type="text" class="inp cc-code" value="${code}" placeholder="e.g. L.HOLD" style="width:80px" oninput="csp(${pIdx},${spIdx})"></td>
-    <td><input type="text" class="inp cc-desc" value="${desc}" placeholder="Description" style="width:100%" oninput="csp(${pIdx},${spIdx})"></td>
-    <td><input type="number" class="inp r cc-amt" value="${amt||''}" placeholder="0" min="0" oninput="csp(${pIdx},${spIdx})"></td>
-    <td><button class="rm-btn" onclick="removeCCItem(this,${pIdx},${spIdx})" title="Remove">✕</button></td>`;
+    <td><select class="inp cc-pillar" onchange="cspAllSP(${pIdx})">${opts}</select></td>
+    <td><input type="text" class="inp cc-code" value="${code}" placeholder="e.g. L.HOLD" style="width:80px" oninput="cspAllSP(${pIdx})"></td>
+    <td><input type="text" class="inp cc-desc" value="${desc}" placeholder="Description" style="width:100%" oninput="cspAllSP(${pIdx})"></td>
+    <td><input type="number" class="inp r cc-amt" value="${amt||''}" placeholder="0" min="0" oninput="cspAllSP(${pIdx})"></td>
+    <td><button class="rm-btn" onclick="removeCCItem(this,${pIdx})" title="Remove">✕</button></td>`;
   tbody.appendChild(tr);
-  // Auto-open if closed
-  const body=document.getElementById('cc-body-'+pIdx+'-'+spIdx);
-  const chev=document.getElementById('cc-chev-'+pIdx+'-'+spIdx);
+  const body=document.getElementById('cc-body-'+pIdx);
+  const chev=document.getElementById('cc-chev-'+pIdx);
   if(body&&body.style.display==='none'){body.style.display='';if(chev)chev.textContent='▼';}
-  csp(pIdx,spIdx);
+  cspAllSP(pIdx);
 }
 
-function removeCCItem(btn,pIdx,spIdx){
+function removeCCItem(btn,pIdx){
   btn.closest('tr').remove();
-  csp(pIdx,spIdx);
+  cspAllSP(pIdx);
 }
 
-// ─── Rebuild CC display rows in matrix ───
+function cspAllSP(pIdx){
+  for(let s=0;s<spCount[pIdx];s++)csp(pIdx,s);
+}
+
+// ─── Rebuild CC display rows in matrix (reads from phase-level CC) ───
 function rebuildCCMatrixRows(pIdx,spIdx){
   const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);if(!body)return;
   body.querySelectorAll('.item-row.cc-row').forEach(r=>r.remove());
@@ -583,13 +625,12 @@ function rebuildCCMatrixRows(pIdx,spIdx){
   const compNFA={};let totalNFA=0;
   compThs.forEach(th=>{
     const cid=th.dataset.cid;
-    const getTd=row=>row?.querySelector('td[data-cid="'+cid+'"]');
-    const u=+(getTd(body.querySelector('[data-a="units"]'))?.querySelector('.c-units')?.value)||0;
-    const n=+(getTd(body.querySelector('[data-a="nfa_u"]'))?.querySelector('.c-nfa')?.value)||0;
+    const u=+(body.querySelector('[data-a="units"] td[data-cid="'+cid+'"] .c-units')?.value)||0;
+    const n=+(body.querySelector('[data-a="nfa_u"] td[data-cid="'+cid+'"] .c-nfa')?.value)||0;
     compNFA[cid]=u*n;totalNFA+=u*n;
   });
   const ccItems=[];
-  document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' tr').forEach(row=>{
+  document.querySelectorAll('#cc-rows-'+pIdx+' tr').forEach(row=>{
     const pillar=row.querySelector('.cc-pillar')?.value||'';
     const code=row.querySelector('.cc-code')?.value||'';
     const desc=row.querySelector('.cc-desc')?.value||'';
@@ -607,7 +648,8 @@ function rebuildCCMatrixRows(pIdx,spIdx){
       tr.className='item-row cc-row'+(isOpen?' open':'');
       tr.dataset.pillar=p.code;
       const label=(item.code?item.code+' ':'')+( item.desc||'Common Cost');
-      tr.innerHTML=`<td class="attr-col">↳ ${label}</td><td class="add-spacer"></td><td class="i-total num">—</td>`;
+      const badge=tagBadge(item.code);
+      tr.innerHTML=`<td class="attr-col">↳ ${label}${badge}</td><td class="cc-pool num">${item.amt>0?fmt(item.amt):'—'}</td><td class="add-spacer"></td><td class="i-total num">—</td>`;
       const spacer=tr.querySelector('.add-spacer');
       compThs.forEach(th=>{
         const cid=th.dataset.cid;
@@ -632,10 +674,10 @@ function csp(pIdx,spIdx){
   rebuildCCMatrixRows(pIdx,spIdx);
   const compThs=Array.from(hdrRow.querySelectorAll('.comp-th'));
 
-  // Common cost total & NFA for allocation
+  // Common cost total (phase-level) & NFA for allocation
   let ccTotal=0;
-  document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' .cc-amt').forEach(inp=>ccTotal+=+inp.value||0);
-  const ccSumEl=document.getElementById('cc-sum-'+pIdx+'-'+spIdx);
+  document.querySelectorAll('#cc-rows-'+pIdx+' .cc-amt').forEach(inp=>ccTotal+=+inp.value||0);
+  const ccSumEl=document.getElementById('cc-sum-'+pIdx);
   if(ccSumEl)ccSumEl.textContent=ccTotal>0?fmt(ccTotal):'RM 0';
 
   // First pass: collect NFA per component
@@ -668,9 +710,9 @@ function csp(pIdx,spIdx){
     const bumiAmt=ggdv*bumiPct;
     const ngdv=ggdv-bumiAmt-subsidy+carpark;
 
-    // CC allocation per pillar for this component
+    // CC allocation per pillar for this component (phase-level CC)
     const ccByPillar={};
-    document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' tr').forEach(row=>{
+    document.querySelectorAll('#cc-rows-'+pIdx+' tr').forEach(row=>{
       const pl=row.querySelector('.cc-pillar')?.value||'';
       const amt=+row.querySelector('.cc-amt')?.value||0;
       const alloc=totalNFA>0?amt*(tnfa/totalNFA):0;
@@ -715,7 +757,7 @@ function csp(pIdx,spIdx){
       const cid=th.dataset.cid;
       const tnfa=compNFA[cid]||0;
       let pSub=0;
-      document.querySelectorAll('#cc-rows-'+pIdx+'-'+spIdx+' tr').forEach(row=>{
+      document.querySelectorAll('#cc-rows-'+pIdx+' tr').forEach(row=>{
         if((row.querySelector('.cc-pillar')?.value||'')===p.code)
           pSub+=totalNFA>0?(+row.querySelector('.cc-amt')?.value||0)*(tnfa/totalNFA):0;
       });
@@ -1095,6 +1137,7 @@ async function signIn(){
   await msalReady();
   await msalApp.loginPopup({scopes:FABRIC_SCOPES});
   updateAuthUI();
+  loadMasterTags();
 }
 
 async function signOut(){
@@ -1149,30 +1192,35 @@ function buildSavePayload(){
   const meta=readMeta();
   const hierarchyRows=[],salesRows=[],costRows=[];
   phases.forEach((ph,pIdx)=>{
+    hierarchyRows.push({
+      l1_company:meta.co,l2_plot_code:meta.plot,l2_plot_name:meta.loc,
+      l3_phase:ph.name,l3_sort_order:pIdx,
+    });
+    // Phase-level CC items
+    let ccSort=0;
+    document.querySelectorAll('#cc-rows-'+pIdx+' tr').forEach(row=>{
+      const pillar=row.querySelector('.cc-pillar')?.value||'';
+      const code=row.querySelector('.cc-code')?.value||'';
+      const desc=row.querySelector('.cc-desc')?.value||'';
+      const amt=+row.querySelector('.cc-amt')?.value||0;
+      if(pillar&&(amt>0||code))costRows.push({
+        l3_phase:ph.name,l5_component:'',
+        pillar_code:pillar,item_code:code,
+        item_description:desc,budget_amt:amt,sort_order:ccSort++,
+      });
+    });
     for(let spIdx=0;spIdx<spCount[pIdx];spIdx++){
       const sp=readSPData(pIdx,spIdx);if(!sp)continue;
-      hierarchyRows.push({
-        l1_company:meta.co,l2_plot_code:meta.plot,l2_plot_name:meta.loc,
-        l3_phase:ph.name,l4_subphase:sp.spName,
-        l3_sort_order:pIdx,l4_sort_order:spIdx,
-      });
-      (sp.ccItems||[]).forEach((item,iSort)=>{
-        if(item.amt>0||item.code)costRows.push({
-          l3_phase:ph.name,l4_subphase:sp.spName,l5_component:'',
-          pillar_code:item.pillar||'COMMON',item_code:item.code||'',
-          item_description:item.desc||'',budget_amt:item.amt||0,sort_order:iSort,
-        });
-      });
       sp.components.forEach((c,cSort)=>{
         salesRows.push({
-          l3_phase:ph.name,l4_subphase:sp.spName,l5_component:c.name,
+          l3_phase:ph.name,l5_component:c.name,
           product_type:c.type,units:c.units,nfa_per_unit:c.nfa,asp_psf:c.asp,
           bumi_pct:c.bumiPct,cross_subsidy_amt:c.subsidy,carpark_revenue:c.carpark,
           sort_order:cSort,
         });
         c.costItems.forEach((item,iSort)=>{
           if(item.budget>0||item.code)costRows.push({
-            l3_phase:ph.name,l4_subphase:sp.spName,l5_component:c.name,
+            l3_phase:ph.name,l5_component:c.name,
             pillar_code:item.pillar,item_code:item.code||'',
             item_description:item.desc||'',budget_amt:item.budget||0,sort_order:iSort,
           });
@@ -1204,16 +1252,16 @@ async function saveSnapshot(){
         created_at:new Date().toISOString()}});
     await gqlInsertMany('createHierarchy','hierarchyCreateInput',p.hierarchyRows.map(r=>({
       snapshot_id:sid,l1_company:r.l1_company||null,l2_plot_code:r.l2_plot_code||null,
-      l2_plot_name:r.l2_plot_name||null,l3_phase:r.l3_phase||null,l4_subphase:r.l4_subphase||null,
-      l3_sort_order:r.l3_sort_order,l4_sort_order:r.l4_sort_order})));
+      l2_plot_name:r.l2_plot_name||null,l3_phase:r.l3_phase||null,
+      l3_sort_order:r.l3_sort_order})));
     await gqlInsertMany('createSales','salesCreateInput',p.salesRows.map(r=>({
-      snapshot_id:sid,l3_phase:r.l3_phase||null,l4_subphase:r.l4_subphase||null,
+      snapshot_id:sid,l3_phase:r.l3_phase||null,
       l5_component:r.l5_component||null,product_type:r.product_type||null,
       units:r.units||null,nfa_per_unit:r.nfa_per_unit||null,asp_psf:r.asp_psf||null,
       bumi_pct:r.bumi_pct||null,cross_subsidy_amt:r.cross_subsidy_amt||null,
       carpark_revenue:r.carpark_revenue||null,sort_order:r.sort_order??0})));
     await gqlInsertMany('createCost1','cost1CreateInput',p.costRows.map((r,i)=>({
-      snapshot_id:sid,l3_phase:r.l3_phase||null,l4_subphase:r.l4_subphase||null,
+      snapshot_id:sid,l3_phase:r.l3_phase||null,
       l5_component:r.l5_component||null,pillar_code:r.pillar_code||null,
       item_code:r.item_code||null,item_description:r.item_description||null,
       budget_amt:r.budget_amt||null,sort_order:r.sort_order??i})));
@@ -1248,9 +1296,9 @@ async function loadSnapshot(id){
     const eid=id.replace(/"/g,'');
     const [sData,hData,salData,cData]=await Promise.all([
       gqlFetch(`query{snapshots(filter:{id:{eq:"${eid}"}}){items{id project_name project_code stage scenario status version_date wacc}}}`),
-      gqlFetch(`query{hierarchies(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{l3_sort_order:ASC}){items{l1_company l2_plot_code l2_plot_name l3_phase l4_subphase l3_sort_order l4_sort_order}}}`),
-      gqlFetch(`query{sales(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{sort_order:ASC}){items{l3_phase l4_subphase l5_component product_type units nfa_per_unit asp_psf bumi_pct cross_subsidy_amt carpark_revenue sort_order}}}`),
-      gqlFetch(`query{cost1s(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{sort_order:ASC}){items{l3_phase l4_subphase l5_component pillar_code item_code item_description budget_amt sort_order}}}`),
+      gqlFetch(`query{hierarchies(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{l3_sort_order:ASC}){items{l1_company l2_plot_code l2_plot_name l3_phase l3_sort_order}}}`),
+      gqlFetch(`query{sales(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{sort_order:ASC}){items{l3_phase l5_component product_type units nfa_per_unit asp_psf bumi_pct cross_subsidy_amt carpark_revenue sort_order}}}`),
+      gqlFetch(`query{cost1s(filter:{snapshot_id:{eq:"${eid}"}},orderBy:{sort_order:ASC}){items{l3_phase l5_component pillar_code item_code item_description budget_amt sort_order}}}`),
     ]);
     restoreFromSupabase(
       sData.snapshots?.items?.[0],
@@ -1300,74 +1348,70 @@ function restoreFromSupabase(snap,hierarchy,sales,costs){
     document.getElementById('sp-list-'+pIdx).innerHTML='';
     spCount[pIdx]=0;
 
-    hierarchy.filter(r=>r.l3_phase===phaseName).forEach(spRow=>{
-      const spName=spRow.l4_subphase;
-      addSubphase(pIdx,spName);
-      const spIdx=spCount[pIdx]-1;
-      const spEl=document.getElementById('sp-'+pIdx+'-'+spIdx);
-      const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
-      const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
+    // Restore phase-level CC items
+    const ccRows=costs.filter(c=>c.l3_phase===phaseName&&c.l5_component==='');
+    if(ccRows.length){
+      const ccBody=document.getElementById('cc-body-'+pIdx);
+      const ccChev=document.getElementById('cc-chev-'+pIdx);
+      if(ccBody){ccBody.style.display='';if(ccChev)ccChev.textContent='▼';}
+      ccRows.forEach(r=>addCCItem(pIdx,r.pillar_code,r.item_code,r.item_description,r.budget_amt));
+    }
 
-      // Common cost items (l5_component = '')
-      const ccRows=costs.filter(c=>c.l3_phase===phaseName&&c.l4_subphase===spName&&c.l5_component==='');
-      if(ccRows.length){
-        const ccBody=document.getElementById('cc-body-'+pIdx+'-'+spIdx);
-        const ccChev=document.getElementById('cc-chev-'+pIdx+'-'+spIdx);
-        if(ccBody){ccBody.style.display='';if(ccChev)ccChev.textContent='▼';}
-        ccRows.forEach(r=>addCCItem(pIdx,spIdx,r.pillar_code,r.item_code,r.item_description,r.budget_amt));
-      }
+    // One default subphase for all components
+    addSubphase(pIdx,'Sub-phase A');
+    const spIdx=0;
+    const body=document.getElementById('mtx-body-'+pIdx+'-'+spIdx);
+    const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
 
-      // Remove default component from addSubphase
-      hdrRow.querySelectorAll('.comp-th').forEach(th=>{
-        const cid=th.dataset.cid;th.remove();
-        body.querySelectorAll('td[data-cid="'+cid+'"]').forEach(td=>td.remove());
-      });
-      compCount[pIdx][spIdx]=0;
-
-      // Add components from sales table
-      const comps=sales.filter(s=>s.l3_phase===phaseName&&s.l4_subphase===spName);
-      comps.forEach(comp=>{
-        addComponent(pIdx,spIdx);
-        const cIdx=compCount[pIdx][spIdx]-1;
-        hdrRow.querySelector('.comp-th[data-cid="'+cIdx+'"]')?.querySelector('.c-name')&&
-          (hdrRow.querySelector('.comp-th[data-cid="'+cIdx+'"]').querySelector('.c-name').value=comp.l5_component||'');
-        const getTd=a=>{const r=body.querySelector('[data-a="'+a+'"]');return r?r.querySelector('td[data-cid="'+cIdx+'"]'):null;};
-        const si=(a,sel,v)=>{const td=getTd(a);if(td){const el=td.querySelector(sel);if(el&&v!=null)el.value=v;}};
-        si('type','.c-type',comp.product_type);
-        si('units','.c-units',comp.units);
-        si('nfa_u','.c-nfa',comp.nfa_per_unit);
-        si('asp','.c-asp',comp.asp_psf);
-        si('bumi_pct','.c-bumi',comp.bumi_pct);
-        si('subsidy','.c-subsidy',comp.cross_subsidy_amt);
-        si('carpark','.c-carpark',comp.carpark_revenue);
-      });
-
-      // Restore pillar items (shared rows across all components)
-      PILLARS.forEach(p=>{
-        clearPillarItems(pIdx,spIdx,p.code);
-        const pillarCosts=costs.filter(c=>c.l3_phase===phaseName&&c.l4_subphase===spName&&c.l5_component!==''&&c.pillar_code===p.code);
-        // Unique items ordered by sort_order
-        const seen=new Set();const uniqueItems=[];
-        [...pillarCosts].sort((a,b)=>a.sort_order-b.sort_order).forEach(c=>{
-          const key=(c.item_code||'')+'||'+(c.item_description||'');
-          if(!seen.has(key)){seen.add(key);uniqueItems.push({code:c.item_code||'',desc:c.item_description||''});}
-        });
-        uniqueItems.forEach(item=>{
-          addPillarItem(pIdx,spIdx,p.code,p.prefix);
-          const rows=body.querySelectorAll('.item-row[data-pillar="'+p.code+'"]');
-          const row=rows[rows.length-1];if(!row)return;
-          const ci=row.querySelector('.i-code');if(ci)ci.value=item.code;
-          const di=row.querySelector('.i-desc');if(di)di.value=item.desc;
-          comps.forEach((comp,cIdx)=>{
-            const match=pillarCosts.find(c=>c.l5_component===comp.l5_component&&c.item_code===item.code);
-            const bi=row.querySelector('td[data-cid="'+cIdx+'"] .i-budget');
-            if(bi&&match)bi.value=match.budget_amt||0;
-          });
-        });
-      });
-
-      csp(pIdx,spIdx);
+    // Remove default component
+    hdrRow.querySelectorAll('.comp-th').forEach(th=>{
+      const cid=th.dataset.cid;th.remove();
+      body.querySelectorAll('td[data-cid="'+cid+'"]').forEach(td=>td.remove());
     });
+    compCount[pIdx][spIdx]=0;
+
+    // Add components
+    const comps=sales.filter(s=>s.l3_phase===phaseName);
+    comps.forEach(comp=>{
+      addComponent(pIdx,spIdx);
+      const cIdx=compCount[pIdx][spIdx]-1;
+      hdrRow.querySelector('.comp-th[data-cid="'+cIdx+'"]')?.querySelector('.c-name')&&
+        (hdrRow.querySelector('.comp-th[data-cid="'+cIdx+'"]').querySelector('.c-name').value=comp.l5_component||'');
+      const getTd=a=>{const r=body.querySelector('[data-a="'+a+'"]');return r?r.querySelector('td[data-cid="'+cIdx+'"]'):null;};
+      const si=(a,sel,v)=>{const td=getTd(a);if(td){const el=td.querySelector(sel);if(el&&v!=null)el.value=v;}};
+      si('type','.c-type',comp.product_type);
+      si('units','.c-units',comp.units);
+      si('nfa_u','.c-nfa',comp.nfa_per_unit);
+      si('asp','.c-asp',comp.asp_psf);
+      si('bumi_pct','.c-bumi',comp.bumi_pct);
+      si('subsidy','.c-subsidy',comp.cross_subsidy_amt);
+      si('carpark','.c-carpark',comp.carpark_revenue);
+    });
+
+    // Restore pillar items
+    PILLARS.forEach(p=>{
+      clearPillarItems(pIdx,spIdx,p.code);
+      const pillarCosts=costs.filter(c=>c.l3_phase===phaseName&&c.l5_component!==''&&c.pillar_code===p.code);
+      const seen=new Set();const uniqueItems=[];
+      [...pillarCosts].sort((a,b)=>a.sort_order-b.sort_order).forEach(c=>{
+        const key=(c.item_code||'')+'||'+(c.item_description||'');
+        if(!seen.has(key)){seen.add(key);uniqueItems.push({code:c.item_code||'',desc:c.item_description||''});}
+      });
+      uniqueItems.forEach(item=>{
+        addPillarItem(pIdx,spIdx,p.code,p.prefix);
+        const rows=body.querySelectorAll('.item-row[data-pillar="'+p.code+'"]');
+        const row=rows[rows.length-1];if(!row)return;
+        const ci=row.querySelector('.i-code');if(ci)ci.value=item.code;
+        const di=row.querySelector('.i-desc');if(di)di.value=item.desc;
+        comps.forEach((comp,cIdx)=>{
+          const match=pillarCosts.find(c=>c.l5_component===comp.l5_component&&c.item_code===item.code);
+          const bi=row.querySelector('td[data-cid="'+cIdx+'"] .i-budget');
+          if(bi&&match)bi.value=match.budget_amt||0;
+        });
+      });
+    });
+
+    csp(pIdx,spIdx);
     switchTab(pIdx);
   });
   updateBreadcrumb();
@@ -1380,8 +1424,11 @@ totalDiv.innerHTML='<p style="color:#aaa;padding:40px;text-align:center">Add pha
 document.getElementById('phase-contents').appendChild(totalDiv);
 addPhase('Phase 1');
 
-// MSAL: check sign-in state on load
-msalReady().then(()=>updateAuthUI());
+// MSAL: check sign-in state on load, then load master tags
+msalReady().then(()=>{
+  updateAuthUI();
+  if(msalApp.getAllAccounts().length>0)loadMasterTags();
+});
 </script>
 </body>
 </html>
