@@ -246,14 +246,39 @@ const fmtPct=(n,gdv)=>gdv>0?(R(n/gdv)*100).toFixed(2)+'%':'—';
 let phases=[];let spCount={};let compCount={};
 let computedSP={};let computedP={};
 let currentTab=0;
-let masterTagMap={};// item_code → default_tag, loaded from master_cost_items
+let masterTagMap={};       // item_code → default_tag
+let masterItemsByPillar={};// pillar_code → [{item_code,item_description,default_tag}]
 
 async function loadMasterTags(){
   try{
-    const data=await gqlFetch('query{master_cost_items{items{item_code default_tag}}}');
-    (data.master_cost_items?.items||[]).forEach(i=>{if(i.item_code)masterTagMap[i.item_code]=i.default_tag||'D';});
-  }catch(e){console.warn('Could not load master tags:',e.message);}
+    const data=await gqlFetch('query{master_cost_items{items{pillar_code item_code item_description default_tag}}}');
+    masterTagMap={};masterItemsByPillar={};
+    (data.master_cost_items?.items||[]).forEach(i=>{
+      if(!i.item_code)return;
+      masterTagMap[i.item_code]=i.default_tag||'D';
+      (masterItemsByPillar[i.pillar_code]=masterItemsByPillar[i.pillar_code]||[]).push(i);
+    });
+    populateItemSelects();
+  }catch(e){console.warn('Could not load master items:',e.message);}
 }
+
+function buildItemOpts(pCode,selectedCode=''){
+  const items=masterItemsByPillar[pCode]||[];
+  return `<option value="">— select item —</option>`+
+    items.map(i=>`<option value="${i.item_code}" data-desc="${i.item_description}"${i.item_code===selectedCode?' selected':''}>${i.item_code} — ${i.item_description}</option>`).join('');
+}
+
+function populateItemSelects(){
+  document.querySelectorAll('.i-item-select').forEach(sel=>{
+    const pCode=sel.closest('tr')?.dataset.pillar||'';
+    const cur=sel.value;
+    sel.innerHTML=buildItemOpts(pCode,cur);
+    // refresh tag badge
+    const span=sel.closest('td')?.querySelector('.row-tag');
+    if(span)span.innerHTML=tagBadge(sel.value);
+  });
+}
+
 function tagBadge(code){
   const t=masterTagMap[code]||'';
   if(!t)return '';
@@ -418,8 +443,8 @@ function buildPillarRows(pIdx,spIdx){
     pRow.innerHTML=`<td class="attr-col">▼ ${p.code} — ${p.name}</td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num">—</td>`;
     tbody.appendChild(pRow);
     // Default item rows — start open
-    p.items.forEach(([code,no,desc],iIdx)=>{
-      const r=makeItemRow(pIdx,spIdx,p.code,iIdx,code,no,desc);
+    p.items.forEach(([code],iIdx)=>{
+      const r=makeItemRow(pIdx,spIdx,p.code,iIdx,code);
       r.classList.add('open');
       tbody.appendChild(r);
     });
@@ -451,25 +476,25 @@ function buildPillarRows(pIdx,spIdx){
   tbody.appendChild(mgRow);
 }
 
-function makeItemRow(pIdx,spIdx,pCode,iIdx,code,no,desc){
+function makeItemRow(pIdx,spIdx,pCode,iIdx,code){
   const tr=document.createElement('tr');
   tr.className='item-row';
   tr.id='irow-'+pIdx+'-'+spIdx+'-'+pCode+'-'+iIdx;
   tr.dataset.pillar=pCode;
   tr.dataset.iidx=iIdx;
+  const opts=buildItemOpts(pCode,code);
   const badge=tagBadge(code);
-  tr.innerHTML=`<td class="attr-col">
-    <input type="text" class="inp mono i-code" value="${code}" placeholder="CODE" style="width:80px"
-      oninput="refreshTagBadge(this,${pIdx},${spIdx})">
-    <input type="text" class="inp i-desc" value="${desc}" placeholder="Description" style="width:140px;margin-left:4px" oninput="csp(${pIdx},${spIdx})">
+  tr.innerHTML=`<td class="attr-col" style="padding-left:18px">
+    <select class="inp i-item-select" style="width:240px;font-size:11px"
+      onchange="onItemSelect(this,${pIdx},${spIdx})">${opts}</select>
     <span class="row-tag">${badge}</span>
   </td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num i-total">—</td>`;
   return tr;
 }
 
-function refreshTagBadge(input,pIdx,spIdx){
-  const span=input.closest('td')?.querySelector('.row-tag');
-  if(span)span.innerHTML=tagBadge(input.value.trim());
+function onItemSelect(sel,pIdx,spIdx){
+  const span=sel.closest('td')?.querySelector('.row-tag');
+  if(span)span.innerHTML=tagBadge(sel.value);
   csp(pIdx,spIdx);
 }
 
@@ -563,7 +588,7 @@ function addPillarItem(pIdx,spIdx,pCode,prefix){
   const hdrRow=document.getElementById('mtx-hdr-'+pIdx+'-'+spIdx);
   const compThs=Array.from(hdrRow.querySelectorAll('.comp-th'));
 
-  const tr=makeItemRow(pIdx,spIdx,pCode,iIdx,'','','');
+  const tr=makeItemRow(pIdx,spIdx,pCode,iIdx,'');
   tr.classList.add('open');
 
   // Add budget inputs for each existing component
@@ -933,8 +958,9 @@ function readSPData(pIdx,spIdx){
     PILLARS.forEach(p=>{
       body.querySelectorAll('.item-row[data-pillar="'+p.code+'"]').forEach(row=>{
         const budget=+(row.querySelector('td[data-cid="'+cid+'"] .i-budget')?.value)||0;
-        const code=row.querySelector('.i-code')?.value||'';
-        const desc=row.querySelector('.i-desc')?.value||'';
+        const sel=row.querySelector('.i-item-select');
+        const code=sel?.value||'';
+        const desc=sel?.options[sel.selectedIndex]?.dataset.desc||'';
         costItems.push({pillar:p.code,code,desc,budget});
       });
     });
@@ -1401,8 +1427,8 @@ function restoreFromSupabase(snap,hierarchy,sales,costs){
         addPillarItem(pIdx,spIdx,p.code,p.prefix);
         const rows=body.querySelectorAll('.item-row[data-pillar="'+p.code+'"]');
         const row=rows[rows.length-1];if(!row)return;
-        const ci=row.querySelector('.i-code');if(ci)ci.value=item.code;
-        const di=row.querySelector('.i-desc');if(di)di.value=item.desc;
+        const sel=row.querySelector('.i-item-select');
+        if(sel){sel.value=item.code;onItemSelect(sel,pIdx,spIdx);}
         comps.forEach((comp,cIdx)=>{
           const match=pillarCosts.find(c=>c.l5_component===comp.l5_component&&c.item_code===item.code);
           const bi=row.querySelector('td[data-cid="'+cIdx+'"] .i-budget');
