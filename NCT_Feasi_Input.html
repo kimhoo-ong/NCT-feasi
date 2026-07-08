@@ -271,9 +271,8 @@ function buildItemOpts(pCode,selectedCode=''){
 function populateItemSelects(){
   document.querySelectorAll('.i-item-select').forEach(sel=>{
     const pCode=sel.closest('tr')?.dataset.pillar||'';
-    const cur=sel.value;
+    const cur=sel.value||sel.dataset.defaultCode||'';
     sel.innerHTML=buildItemOpts(pCode,cur);
-    // refresh tag badge
     const span=sel.closest('td')?.querySelector('.row-tag');
     if(span)span.innerHTML=tagBadge(sel.value);
   });
@@ -486,6 +485,7 @@ function makeItemRow(pIdx,spIdx,pCode,iIdx,code){
   const badge=tagBadge(code);
   tr.innerHTML=`<td class="attr-col" style="padding-left:18px">
     <select class="inp i-item-select" style="width:240px;font-size:11px"
+      data-default-code="${code}"
       onchange="onItemSelect(this,${pIdx},${spIdx})">${opts}</select>
     <span class="row-tag">${badge}</span>
   </td><td class="cc-pool-blank"></td><td class="add-spacer"></td><td class="tcpd num i-total">—</td>`;
